@@ -1,0 +1,141 @@
+[gd_scene format=3 uid="uid://i2jxuosds84b"]
+
+[ext_resource type="Script" uid="uid://dh5rgbg3x3qyl" path="res://scripts/chess/chessBoardScript.gd" id="1_bn2q4"]
+[ext_resource type="Texture2D" uid="uid://cdi0pqhp6mtp4" path="res://assets/board/chess_board_tiles.svg" id="1_tiles"]
+[ext_resource type="Script" uid="uid://dnmqhtnd7meaj" path="res://scripts/chess/move_rule.gd" id="2_rule"]
+[ext_resource type="PackedScene" uid="uid://cjfrjvuevputu" path="res://Scenes/Chess/classic_black_piece.tscn" id="3_p7jj0"]
+[ext_resource type="PackedScene" uid="uid://cg32l7wtisebm" path="res://Scenes/Chess/classic_white_piece.tscn" id="4_black"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tiles"]
+texture = ExtResource("1_tiles")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+1:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_chess"]
+tile_size = Vector2i(64, 64)
+sources/0 = SubResource("TileSetAtlasSource_tiles")
+
+[node name="ChessBoard" type="Node2D" unique_id=1319020172]
+script = ExtResource("1_bn2q4")
+white_piece_scene = ExtResource("4_black")
+black_piece_scene = ExtResource("3_p7jj0")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1251295748]
+tile_set = SubResource("TileSet_chess")
+
+[node name="Highlights" type="Node2D" parent="." unique_id=1100679150]
+
+[node name="SelectMarker" type="ColorRect" parent="Highlights" unique_id=1757037135]
+visible = false
+offset_right = 64.0
+offset_bottom = 64.0
+mouse_filter = 2
+color = Color(0.2, 0.7, 1, 0.5)
+
+[node name="MoveMarker" type="ColorRect" parent="Highlights" unique_id=1240029105]
+visible = false
+offset_right = 64.0
+offset_bottom = 64.0
+mouse_filter = 2
+color = Color(0.1, 0.7, 0.2, 0.45)
+
+[node name="CaptureMarker" type="ColorRect" parent="Highlights" unique_id=2026218127]
+visible = false
+offset_right = 64.0
+offset_bottom = 64.0
+mouse_filter = 2
+color = Color(0.9, 0.15, 0.15, 0.55)
+
+[node name="Pieces" type="Node2D" parent="." unique_id=241517242]
+
+[node name="Rules" type="Node" parent="." unique_id=953237309]
+
+[node name="Pawn" type="Node" parent="Rules" unique_id=1631812977]
+script = ExtResource("2_rule")
+move_only_directions = Array[Vector2i]([Vector2i(0, -1)])
+capture_only_directions = Array[Vector2i]([Vector2i(-1, -1), Vector2i(1, -1)])
+first_move_range = 2
+promotes = true
+
+[node name="Knight" type="Node" parent="Rules" unique_id=139528634]
+script = ExtResource("2_rule")
+piece_type = "knight"
+directions = Array[Vector2i]([Vector2i(1, 2), Vector2i(2, 1), Vector2i(-1, 2), Vector2i(-2, 1), Vector2i(1, -2), Vector2i(2, -1), Vector2i(-1, -2), Vector2i(-2, -1)])
+jumps = true
+
+[node name="Bishop" type="Node" parent="Rules" unique_id=1617390587]
+script = ExtResource("2_rule")
+piece_type = "bishop"
+directions = Array[Vector2i]([Vector2i(1, 1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(-1, -1)])
+max_range = 7
+
+[node name="Rook" type="Node" parent="Rules" unique_id=41457046]
+script = ExtResource("2_rule")
+piece_type = "rook"
+directions = Array[Vector2i]([Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)])
+max_range = 7
+
+[node name="Queen" type="Node" parent="Rules" unique_id=693891595]
+script = ExtResource("2_rule")
+piece_type = "queen"
+directions = Array[Vector2i]([Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(-1, -1)])
+max_range = 7
+
+[node name="King" type="Node" parent="Rules" unique_id=1757398151]
+script = ExtResource("2_rule")
+piece_type = "king"
+directions = Array[Vector2i]([Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, 1), Vector2i(1, -1), Vector2i(-1, 1), Vector2i(-1, -1)])
+
+[node name="UI" type="Control" parent="." unique_id=331033066]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="Status" type="Label" parent="UI" unique_id=694311489]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 516.0
+offset_right = 408.0
+offset_bottom = 548.0
+theme_override_font_sizes/font_size = 20
+text = "White to move"
+
+[node name="Restart" type="Button" parent="UI" unique_id=479491815]
+layout_mode = 0
+offset_left = 424.0
+offset_top = 516.0
+offset_right = 504.0
+offset_bottom = 548.0
+text = "Restart"
+
+[node name="PromotionPicker" type="HBoxContainer" parent="UI" unique_id=1143925627]
+visible = false
+layout_mode = 0
+offset_left = 112.0
+offset_top = 224.0
+offset_right = 400.0
+offset_bottom = 288.0
+theme_override_constants/separation = 0
+
+[node name="Queen" type="Button" parent="UI/PromotionPicker" unique_id=1124797914]
+custom_minimum_size = Vector2(72, 64)
+layout_mode = 2
+text = "Queen"
+
+[node name="Rook" type="Button" parent="UI/PromotionPicker" unique_id=338564879]
+custom_minimum_size = Vector2(72, 64)
+layout_mode = 2
+text = "Rook"
+
+[node name="Bishop" type="Button" parent="UI/PromotionPicker" unique_id=1804368110]
+custom_minimum_size = Vector2(72, 64)
+layout_mode = 2
+text = "Bishop"
+
+[node name="Knight" type="Button" parent="UI/PromotionPicker" unique_id=756618797]
+custom_minimum_size = Vector2(72, 64)
+layout_mode = 2
+text = "Knight"
+
+[connection signal="pressed" from="UI/Restart" to="." method="restart"]

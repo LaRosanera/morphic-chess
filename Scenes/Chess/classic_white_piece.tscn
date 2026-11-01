@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://cg32l7wtisebm"]
+
+[ext_resource type="Texture2D" uid="uid://b5v3dlo7rle48" path="res://assets/pieces/classic/Chess_Pieces_Sprite.svg" id="1_opad5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eock1"]
+atlas = ExtResource("1_opad5")
+region = Rect2(90, 0, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q8wna"]
+atlas = ExtResource("1_opad5")
+region = Rect2(0, 0, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gpf22"]
+atlas = ExtResource("1_opad5")
+region = Rect2(135, 0, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_opad5"]
+atlas = ExtResource("1_opad5")
+region = Rect2(225, 0, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ygdck"]
+atlas = ExtResource("1_opad5")
+region = Rect2(45, 0, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uvpcq"]
+atlas = ExtResource("1_opad5")
+region = Rect2(180, 0, 45, 45)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bhunq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eock1")
+}],
+"loop": 1,
+"name": &"white_bishop",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q8wna")
+}],
+"loop": 1,
+"name": &"white_king",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gpf22")
+}],
+"loop": 1,
+"name": &"white_knight",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_opad5")
+}],
+"loop": 1,
+"name": &"white_pawn",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ygdck")
+}],
+"loop": 1,
+"name": &"white_queen",
+"speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uvpcq")
+}],
+"loop": 1,
+"name": &"white_rook",
+"speed": 0.0
+}]
+
+[node name="classic_white_piece" type="AnimatedSprite2D" unique_id=1731590654]
+texture_filter = 2
+sprite_frames = SubResource("SpriteFrames_bhunq")
+animation = &"white_rook"

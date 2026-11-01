@@ -20,7 +20,13 @@ extends Node2D
 @onready var highlights: Node2D = $Highlights
 @onready var status: Label = $UI/Status
 @onready var picker: Control = $UI/PromotionPicker
+@onready var log_box: RichTextLabel = $UI/Terminal/Log
 
+const LETTERS := {"p": "pawn", "n": "knight", "b": "bishop", "r": "rook", "q": "queen", "k": "king"}
+
+## static so it survives restart() reloading the scene
+static var preset_path := "res://assets/board/board_layouts/classic.json"
+var move_count := 0
 var grid := {}            # Vector2i -> piece node
 var rules := {}           # piece type -> MoveRule node
 var moves := {}           # legal target cells of the selected piece
@@ -28,6 +34,7 @@ var turn := "white"
 var selected: AnimatedSprite2D
 var promoting: AnimatedSprite2D
 var over := false
+var _pending_name := ""
 
 
 func _ready() -> void:
@@ -39,15 +46,46 @@ func _ready() -> void:
 	_spawn_pieces()
 	for b: Button in picker.get_children():
 		b.pressed.connect(_promote.bind(String(b.name).to_lower()))
+	_log("MORPHIC CHESS v0.1")
+	_log("------------------")
+	_log("No check rules. Capture the enemy king to win.")
+	_log("White to move.\n")
 	_update_status()
+	_update_status()
+	if _pending_name != "":
+		_log("Preset: %s\n" % _pending_name, "#ffd166")
 
 
 func _spawn_pieces() -> void:
+	if preset_path != "" and _spawn_from_file(preset_path):
+		return
 	for x in MoveRule.SIZE:
 		_spawn("black", back_rank[x], Vector2i(x, 0))
 		_spawn("black", "pawn", Vector2i(x, 1))
 		_spawn("white", "pawn", Vector2i(x, 6))
 		_spawn("white", back_rank[x], Vector2i(x, 7))
+
+
+func _spawn_from_file(path: String) -> bool:
+	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not (data is Dictionary and data.get("board") is Array):
+		return false
+	var rows: Array = data["board"]
+	for y in mini(rows.size(), MoveRule.SIZE):
+		var row: String = rows[y]
+		for x in mini(row.length(), MoveRule.SIZE):
+			var ch := row[x]
+			var type: String = LETTERS.get(ch.to_lower(), "")
+			if type == "":
+				continue
+			var color := "white" if ch == ch.to_upper() else "black"
+			var cell := Vector2i(x, y)
+			_spawn(color, type, cell)
+			# pawns off their home rank shouldn't get the double step
+			if type == "pawn" and y != (6 if color == "white" else 1):
+				grid[cell].set_meta("moved", true)
+	_pending_name = str(data.get("name", path.get_file()))
+	return true
 
 
 func _spawn(color: String, type: String, cell: Vector2i) -> void:
@@ -104,15 +142,19 @@ func _mark(template: ColorRect, cell: Vector2i) -> void:
 
 
 func _move(p: AnimatedSprite2D, to: Vector2i) -> void:
+	var from: Vector2i = grid.find_key(p)
 	var victim = grid.get(to)
-	grid.erase(grid.find_key(p))
+	var victim_type := ""
+	grid.erase(from)
 	if victim:
+		victim_type = MoveRule.type_of(victim)
 		victim.queue_free()
-		over = MoveRule.type_of(victim) == "king"
+		over = victim_type == "king"
 	grid[to] = p
 	p.set_meta("moved", true)
 	create_tween().tween_property(p, "position", tiles.map_to_local(to), 0.15)
 	_deselect()
+	_log_move(p, from, to, victim_type)
 
 	var rule: MoveRule = rules[MoveRule.type_of(p)]
 	var far_rank := 0 if turn == "white" else MoveRule.SIZE - 1
@@ -128,6 +170,7 @@ func _promote(type: String) -> void:
 	promoting.animation = StringName("%s_%s" % [turn, type])
 	promoting = null
 	picker.hide()
+	_log("   pawn promoted to %s" % type, _turn_color())
 	_end_turn()
 
 
@@ -135,7 +178,37 @@ func _end_turn() -> void:
 	if not over:
 		turn = "black" if turn == "white" else "white"
 	_update_status()
+func _sq(cell: Vector2i) -> String:
+	return "%s%d" % [char(97 + cell.x), MoveRule.SIZE - cell.y]
 
 
+func _turn_color() -> String:
+	return "#ffffff" if turn == "white" else "#9aa0a6"
+
+
+func _log(text: String, color := "#7cfc7c") -> void:
+	log_box.append_text("[color=%s]%s[/color]\n" % [color, text])
+
+
+func _log_move(p: AnimatedSprite2D, from: Vector2i, to: Vector2i, victim_type: String) -> void:
+	move_count += 1
+	var line := "%d. %s %s %s -> %s" % [move_count, turn.capitalize(), MoveRule.type_of(p), _sq(from), _sq(to)]
+	if victim_type != "":
+		line += " x%s" % victim_type
+	_log(line, _turn_color())
+	if over:
+		_log("\n%s wins! King captured." % turn.capitalize(), "#ffd166")
+func open_preset_picker() -> void: # connect a "Load" button's pressed signal to this
+	var dlg := FileDialog.new()
+	dlg.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	dlg.access = FileDialog.ACCESS_FILESYSTEM
+	dlg.filters = ["*.json ; Board presets"]
+	dlg.use_native_dialog = true
+	dlg.file_selected.connect(func(path: String):
+		preset_path = path
+		restart())
+	add_child(dlg)
+	dlg.popup_centered_ratio(0.6)
+	
 func _update_status() -> void:
 	status.text = ("%s wins!" if over else "%s to move") % turn.capitalize()

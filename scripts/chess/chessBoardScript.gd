@@ -35,27 +35,50 @@ var selected: AnimatedSprite2D
 var promoting: AnimatedSprite2D
 var over := false
 var _pending_name := ""
+var player1_name := "White"
+var player2_name := "Black"
 
+var game_seed: int = 0
+var rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
+	_load_game_configuration()
+
 	for y in MoveRule.SIZE:
 		for x in MoveRule.SIZE:
 			tiles.set_cell(Vector2i(x, y), 0, Vector2i((x + y) % 2, 0))
+
 	for r: MoveRule in $Rules.get_children():
 		rules[r.piece_type] = r
+
 	_spawn_pieces()
+
 	for b: Button in picker.get_children():
 		b.pressed.connect(_promote.bind(String(b.name).to_lower()))
+
 	_log("MORPHIC CHESS v0.1")
 	_log("------------------")
 	_log("No check rules. Capture the enemy king to win.")
-	_log("White to move.\n")
+	_log("%s to move.\n" % player1_name)
+
 	_update_status()
-	_update_status()
+
 	if _pending_name != "":
 		_log("Preset: %s\n" % _pending_name, "#ffd166")
 
+func _load_game_configuration() -> void:
+	var config: Dictionary = get_tree().get_meta("chess_config", {})
 
+	player1_name = str(config.get("white_name", "White"))
+	player2_name = str(config.get("black_name", "Black"))
+
+	game_seed = int(config.get("seed", get_tree().get_meta("game_seed", 0)))
+
+	rng.seed = game_seed
+
+	_log("Seed: %d" % game_seed, "#ffd166")
+	_log("Player 1 (White): %s" % player1_name)
+	_log("Player 2 (Black): %s\n" % player2_name)
 func _spawn_pieces() -> void:
 	if preset_path != "" and _spawn_from_file(preset_path):
 		return
@@ -190,14 +213,29 @@ func _log(text: String, color := "#7cfc7c") -> void:
 	log_box.append_text("[color=%s]%s[/color]\n" % [color, text])
 
 
-func _log_move(p: AnimatedSprite2D, from: Vector2i, to: Vector2i, victim_type: String) -> void:
+func _log_move(
+	p: AnimatedSprite2D,
+	from: Vector2i,
+	to: Vector2i,
+	victim_type: String
+) -> void:
 	move_count += 1
-	var line := "%d. %s %s %s -> %s" % [move_count, turn.capitalize(), MoveRule.type_of(p), _sq(from), _sq(to)]
+
+	var line := "%d. %s (%s) %s -> %s" % [
+		move_count,
+		_current_player_name(),
+		turn.capitalize(),
+		MoveRule.type_of(p),
+		_sq(to)
+	]
+
 	if victim_type != "":
 		line += " x%s" % victim_type
+
 	_log(line, _turn_color())
+
 	if over:
-		_log("\n%s wins! King captured." % turn.capitalize(), "#ffd166")
+		_log("\n%s wins! King captured." % _current_player_name(), "#ffd166")
 func open_preset_picker() -> void: # connect a "Load" button's pressed signal to this
 	var dlg := FileDialog.new()
 	dlg.file_mode = FileDialog.FILE_MODE_OPEN_FILE
@@ -209,6 +247,14 @@ func open_preset_picker() -> void: # connect a "Load" button's pressed signal to
 		restart())
 	add_child(dlg)
 	dlg.popup_centered_ratio(0.6)
+func _current_player_name() -> String:
+	return player1_name if turn == "white" else player2_name
 	
 func _update_status() -> void:
-	status.text = ("%s wins!" if over else "%s to move") % turn.capitalize()
+	if over:
+		status.text = "%s wins!" % _current_player_name()
+	else:
+		status.text = "%s's turn (%s)" % [
+			_current_player_name(),
+			turn.capitalize()
+		]

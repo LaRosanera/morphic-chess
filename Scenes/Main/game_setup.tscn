@@ -1,0 +1,193 @@
+[gd_scene format=3 uid="uid://dgrck20d0hor6"]
+
+[ext_resource type="Script" uid="uid://cxbcqruvqkhev" path="res://scripts/main/game_setup.gd" id="1_pfm0t"]
+
+[node name="GameSetup" type="Control" unique_id=1063435747]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_pfm0t")
+
+[node name="Background" type="ColorRect" parent="." unique_id=683678014]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.047, 0.063, 0.09, 1)
+
+[node name="Center" type="CenterContainer" parent="." unique_id=712334181]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = -16.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center" unique_id=764268806]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel" unique_id=1155761190]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="Content" type="VBoxContainer" parent="Center/Panel/Margin" unique_id=1724753326]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="VBoxContainer" parent="Center/Panel/Margin/Content" unique_id=381021445]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Heading" type="Label" parent="Center/Panel/Margin/Content/Header" unique_id=651823055]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "MATCH CONFIGURATION"
+
+[node name="Subtitle" type="Label" parent="Center/Panel/Margin/Content/Header" unique_id=924765133]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.494, 0.988, 0.494, 1)
+theme_override_font_sizes/font_size = 12
+text = "LOCAL TWO-PLAYER / STANDARD STARTING POSITION"
+
+[node name="Divider" type="HSeparator" parent="Center/Panel/Margin/Content" unique_id=208436303]
+layout_mode = 2
+
+[node name="Fields" type="GridContainer" parent="Center/Panel/Margin/Content" unique_id=1542209568]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 12
+columns = 2
+
+[node name="WhiteField" type="VBoxContainer" parent="Center/Panel/Margin/Content/Fields" unique_id=1064446636]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/Content/Fields/WhiteField" unique_id=1249653210]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "WHITE PLAYER"
+
+[node name="WhiteName" type="LineEdit" parent="Center/Panel/Margin/Content/Fields/WhiteField" unique_id=1758322663]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+placeholder_text = "White"
+max_length = 24
+
+[node name="BlackField" type="VBoxContainer" parent="Center/Panel/Margin/Content/Fields" unique_id=1287608298]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/Content/Fields/BlackField" unique_id=1468514285]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "BLACK PLAYER"
+
+[node name="BlackName" type="LineEdit" parent="Center/Panel/Margin/Content/Fields/BlackField" unique_id=1387536247]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+placeholder_text = "Black"
+max_length = 24
+
+[node name="TimeField" type="VBoxContainer" parent="Center/Panel/Margin/Content/Fields" unique_id=1395818772]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/Content/Fields/TimeField" unique_id=1567649136]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "TIME CONTROL"
+
+[node name="TimeControl" type="OptionButton" parent="Center/Panel/Margin/Content/Fields/TimeField" unique_id=1685178546]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+
+[node name="OrientationField" type="VBoxContainer" parent="Center/Panel/Margin/Content/Fields" unique_id=309314226]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/Content/Fields/OrientationField" unique_id=916294448]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "BOARD ORIENTATION"
+
+[node name="Orientation" type="OptionButton" parent="Center/Panel/Margin/Content/Fields/OrientationField" unique_id=297430969]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+
+[node name="SeedField" type="VBoxContainer" parent="Center/Panel/Margin/Content/Fields" unique_id=1416384801]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/Content/Fields/SeedField" unique_id=1442240910]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "GAME SEED"
+
+[node name="SeedInput" type="LineEdit" parent="Center/Panel/Margin/Content/Fields/SeedField" unique_id=70045867]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "12345"
+placeholder_text = "Enter an integer"
+max_length = 19
+
+[node name="DailyField" type="VBoxContainer" parent="Center/Panel/Margin/Content/Fields" unique_id=737305110]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/Content/Fields/DailyField" unique_id=897735933]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "DAILY SEED"
+
+[node name="DailySeed" type="CheckButton" parent="Center/Panel/Margin/Content/Fields/DailyField" unique_id=770887078]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Use fixed daily seed"
+
+[node name="SummaryPanel" type="PanelContainer" parent="Center/Panel/Margin/Content" unique_id=1920831141]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+
+[node name="Summary" type="Label" parent="Center/Panel/Margin/Content/SummaryPanel" unique_id=1893091419]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.494, 0.988, 0.494, 1)
+theme_override_font_sizes/font_size = 14
+text = "White vs Black"
+autowrap_mode = 2
+
+[node name="StatusLabel" type="Label" parent="Center/Panel/Margin/Content" unique_id=331493341]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.737, 0.612, 1)
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="Center/Panel/Margin/Content" unique_id=829743919]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BackButton" type="Button" parent="Center/Panel/Margin/Content/Buttons" unique_id=74856552]
+custom_minimum_size = Vector2(160, 46)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "< BACK"
+
+[node name="StartButton" type="Button" parent="Center/Panel/Margin/Content/Buttons" unique_id=1218030787]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "START GAME  >"

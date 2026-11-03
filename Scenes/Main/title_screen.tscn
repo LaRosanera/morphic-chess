@@ -1,0 +1,186 @@
+[gd_scene format=3 uid="uid://sopqo7erh32j"]
+
+[ext_resource type="Script" uid="uid://beri8150iuoh5" path="res://scripts/main/title_screen.gd" id="1"]
+
+[node name="TitleScreen" type="Control" unique_id=661133958]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1896382270]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.047, 0.063, 0.09, 1)
+
+[node name="PieceLayer" type="Node2D" parent="." unique_id=1253970189]
+
+[node name="MenuCanvas" type="Control" parent="." unique_id=1760625454]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -384.0
+offset_top = -276.0
+offset_right = 384.0
+offset_bottom = 276.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Block1" type="ColorRect" parent="MenuCanvas" unique_id=243742556]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 192.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.157, 0.216, 0.278, 1)
+
+[node name="Block2" type="ColorRect" parent="MenuCanvas" unique_id=96939144]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 36.0
+offset_bottom = 136.0
+mouse_filter = 2
+color = Color(0.157, 0.216, 0.278, 1)
+
+[node name="Block3" type="ColorRect" parent="MenuCanvas" unique_id=514926861]
+layout_mode = 0
+offset_left = 576.0
+offset_top = 24.0
+offset_right = 744.0
+offset_bottom = 36.0
+mouse_filter = 2
+color = Color(0.157, 0.216, 0.278, 1)
+
+[node name="Block4" type="ColorRect" parent="MenuCanvas" unique_id=1201881169]
+layout_mode = 0
+offset_left = 732.0
+offset_top = 24.0
+offset_right = 744.0
+offset_bottom = 136.0
+mouse_filter = 2
+color = Color(0.157, 0.216, 0.278, 1)
+
+[node name="Block5" type="ColorRect" parent="MenuCanvas" unique_id=2026374098]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 516.0
+offset_right = 192.0
+offset_bottom = 528.0
+mouse_filter = 2
+color = Color(0.157, 0.216, 0.278, 1)
+
+[node name="Block6" type="ColorRect" parent="MenuCanvas" unique_id=441594552]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 416.0
+offset_right = 36.0
+offset_bottom = 528.0
+mouse_filter = 2
+color = Color(0.157, 0.216, 0.278, 1)
+
+[node name="Block7" type="ColorRect" parent="MenuCanvas" unique_id=393590220]
+layout_mode = 0
+offset_left = 576.0
+offset_top = 516.0
+offset_right = 744.0
+offset_bottom = 528.0
+mouse_filter = 2
+color = Color(0.157, 0.216, 0.278, 1)
+
+[node name="Block8" type="ColorRect" parent="MenuCanvas" unique_id=743903632]
+layout_mode = 0
+offset_left = 732.0
+offset_top = 416.0
+offset_right = 744.0
+offset_bottom = 528.0
+mouse_filter = 2
+color = Color(0.157, 0.216, 0.278, 1)
+
+[node name="Shadow" type="ColorRect" parent="MenuCanvas" unique_id=1864192868]
+layout_mode = 0
+offset_left = 182.0
+offset_top = 72.0
+offset_right = 606.0
+offset_bottom = 496.0
+mouse_filter = 2
+color = Color(0.02, 0.027, 0.047, 1)
+
+[node name="Panel" type="PanelContainer" parent="MenuCanvas" unique_id=1446759746]
+layout_mode = 0
+offset_left = 172.0
+offset_top = 62.0
+offset_right = 596.0
+offset_bottom = 486.0
+
+[node name="Margin" type="MarginContainer" parent="MenuCanvas/Panel" unique_id=243038546]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="MenuCanvas/Panel/Margin" unique_id=802319349]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SystemLabel" type="Label" parent="MenuCanvas/Panel/Margin/Content" unique_id=679529805]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.494, 0.988, 0.494, 1)
+theme_override_font_sizes/font_size = 12
+text = "[ STRATEGY SYSTEM / 01 ]"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="MenuCanvas/Panel/Margin/Content" unique_id=446151623]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.933, 0.953, 0.98, 1)
+theme_override_font_sizes/font_size = 42
+text = "MORPHIC"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="MenuCanvas/Panel/Margin/Content" unique_id=1338565135]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.651, 0.733, 0.808, 1)
+theme_override_font_sizes/font_size = 28
+text = "C H E S S"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="MenuCanvas/Panel/Margin/Content" unique_id=1271662306]
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="MenuCanvas/Panel/Margin/Content" unique_id=2055230767]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+focus_neighbor_top = NodePath("../Separator")
+text = "NEW GAME  >"
+
+[node name="MotionButton" type="CheckButton" parent="MenuCanvas/Panel/Margin/Content" unique_id=1199971045]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "REDUCED MOTION"
+
+[node name="QuitButton" type="Button" parent="MenuCanvas/Panel/Margin/Content" unique_id=428364341]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "QUIT"
+
+[node name="StatusLabel" type="Label" parent="MenuCanvas/Panel/Margin/Content" unique_id=79888886]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.494, 0.988, 0.494, 1)
+theme_override_font_sizes/font_size = 11
+text = "By Rosanera"
+horizontal_alignment = 1

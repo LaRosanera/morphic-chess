@@ -1,0 +1,179 @@
+[gd_scene format=3 uid="uid://bqd4qxf4oynm8"]
+
+[ext_resource type="Script" uid="uid://bt6eqnfhj6le7" path="res://scripts/main/settings.gd" id="1_lgwr1"]
+
+[node name="SettingsMenu" type="Control" unique_id=2112605759]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lgwr1")
+
+[node name="Background" type="ColorRect" parent="." unique_id=415009024]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.025, 0.04, 0.85)
+
+[node name="Center" type="CenterContainer" parent="." unique_id=357535177]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center" unique_id=1808123505]
+custom_minimum_size = Vector2(720, 560)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel" unique_id=2025245667]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="Main" type="VBoxContainer" parent="Center/Panel/Margin" unique_id=1730567519]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Center/Panel/Margin/Main" unique_id=1755188629]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/Main/Header" unique_id=1448069198]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 26
+text = "MORPHIC CHESS — SETTINGS"
+
+[node name="Close" type="Button" parent="Center/Panel/Margin/Main/Header" unique_id=600830286]
+layout_mode = 2
+text = "X"
+
+[node name="Tabs" type="TabContainer" parent="Center/Panel/Margin/Main" unique_id=1993447441]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="Game" type="VBoxContainer" parent="Center/Panel/Margin/Main/Tabs" unique_id=95834213]
+layout_mode = 2
+theme_override_constants/separation = 10
+metadata/_tab_index = 0
+
+[node name="GameHeading" type="Label" parent="Center/Panel/Margin/Main/Tabs/Game" unique_id=1240399458]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "GAME INFORMATION"
+
+[node name="GameScroll" type="ScrollContainer" parent="Center/Panel/Margin/Main/Tabs/Game" unique_id=1284880475]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="GameInfo" type="RichTextLabel" parent="Center/Panel/Margin/Main/Tabs/Game/GameScroll" unique_id=337515787]
+custom_minimum_size = Vector2(640, 400)
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+text = "Loading game information..."
+fit_content = true
+
+[node name="Audio" type="VBoxContainer" parent="Center/Panel/Margin/Main/Tabs" unique_id=829913989]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 18
+metadata/_tab_index = 1
+
+[node name="AudioHeading" type="Label" parent="Center/Panel/Margin/Main/Tabs/Audio" unique_id=1477394033]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "AUDIO SETTINGS"
+
+[node name="MasterLabel" type="Label" parent="Center/Panel/Margin/Main/Tabs/Audio" unique_id=1892238160]
+layout_mode = 2
+text = "Master Volume"
+
+[node name="MasterSlider" type="HSlider" parent="Center/Panel/Margin/Main/Tabs/Audio" unique_id=1241007023]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="MusicLabel" type="Label" parent="Center/Panel/Margin/Main/Tabs/Audio" unique_id=327811252]
+layout_mode = 2
+text = "Music Volume"
+
+[node name="MusicSlider" type="HSlider" parent="Center/Panel/Margin/Main/Tabs/Audio" unique_id=614068252]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="SFXLabel" type="Label" parent="Center/Panel/Margin/Main/Tabs/Audio" unique_id=593708668]
+layout_mode = 2
+text = "Sound Effects Volume"
+
+[node name="SFXSlider" type="HSlider" parent="Center/Panel/Margin/Main/Tabs/Audio" unique_id=1104105770]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="AudioNote" type="Label" parent="Center/Panel/Margin/Main/Tabs/Audio" unique_id=1573714139]
+layout_mode = 2
+text = "Music and SFX sliders require matching Audio buses."
+
+[node name="Display" type="VBoxContainer" parent="Center/Panel/Margin/Main/Tabs" unique_id=1207496147]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+metadata/_tab_index = 2
+
+[node name="DisplayHeading" type="Label" parent="Center/Panel/Margin/Main/Tabs/Display" unique_id=2055772415]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "DISPLAY SETTINGS"
+
+[node name="ResolutionLabel" type="Label" parent="Center/Panel/Margin/Main/Tabs/Display" unique_id=1017012403]
+layout_mode = 2
+text = "Resolution"
+
+[node name="ResolutionOption" type="OptionButton" parent="Center/Panel/Margin/Main/Tabs/Display" unique_id=1841083251]
+layout_mode = 2
+disabled = true
+item_count = 1
+popup/item_0/text = "Coming soon"
+popup/item_0/id = 0
+
+[node name="DisplayNote" type="Label" parent="Center/Panel/Margin/Main/Tabs/Display" unique_id=810446697]
+layout_mode = 2
+text = "Resolution and fullscreen options will be implemented later."
+
+[node name="Footer" type="HBoxContainer" parent="Center/Panel/Margin/Main" unique_id=1416125039]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="MainMenu" type="Button" parent="Center/Panel/Margin/Main/Footer" unique_id=1443098038]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Main Menu"
+
+[node name="Quit" type="Button" parent="Center/Panel/Margin/Main/Footer" unique_id=3721842]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Quit Game"
+
+[connection signal="pressed" from="Center/Panel/Margin/Main/Header/Close" to="." method="_on_close_pressed"]
+[connection signal="pressed" from="Center/Panel/Margin/Main/Footer/MainMenu" to="." method="_on_main_menu_pressed"]
+[connection signal="pressed" from="Center/Panel/Margin/Main/Footer/Quit" to="." method="_on_quit_pressed"]

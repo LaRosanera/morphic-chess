@@ -174,4 +174,4 @@ layout_mode = 2
 text = "Knight"
 
 [connection signal="pressed" from="UI/Restart" to="." method="restart"]
-[connection signal="pressed" from="UI/settings" to="." method="restart"]
+[connection signal="pressed" from="UI/settings" to="." method="_on_settings_pressed"]

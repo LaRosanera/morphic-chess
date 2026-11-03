@@ -14,7 +14,7 @@ extends Node2D
 @export var black_piece_scene: PackedScene
 ## Back-rank order, a-file to h-file.
 @export var back_rank: Array[String] = ["rook", "knight", "bishop", "queen", "king", "bishop", "knight", "rook"]
-
+var daily_changes: Array[String] = []
 @onready var tiles: TileMapLayer = $TileMapLayer
 @onready var pieces: Node2D = $Pieces
 @onready var highlights: Node2D = $Highlights
@@ -23,6 +23,7 @@ extends Node2D
 @onready var log_box: RichTextLabel = $UI/Terminal/Log
 
 const LETTERS := {"p": "pawn", "n": "knight", "b": "bishop", "r": "rook", "q": "queen", "k": "king"}
+const SETTINGS_SCENE = preload("res://Scenes/Main/settings.tscn")
 
 ## static so it survives restart() reloading the scene
 static var preset_path := "res://assets/board/board_layouts/classic.json"
@@ -50,7 +51,9 @@ func _ready() -> void:
 
 	for r: MoveRule in $Rules.get_children():
 		rules[r.piece_type] = r
-
+	
+	_apply_seeded_rules()
+	
 	_spawn_pieces()
 
 	for b: Button in picker.get_children():
@@ -72,13 +75,25 @@ func _load_game_configuration() -> void:
 	player1_name = str(config.get("white_name", "White"))
 	player2_name = str(config.get("black_name", "Black"))
 
-	game_seed = int(config.get("seed", get_tree().get_meta("game_seed", 0)))
+	# Read the seed from daily_seed.json
+	var seed_path := "res://daily_seed.json"
+
+	if FileAccess.file_exists(seed_path):
+		var seed_text := FileAccess.get_file_as_string(seed_path).strip_edges()
+
+		if seed_text.is_valid_int():
+			game_seed = int(seed_text)
+		else:
+			game_seed = int(config.get("seed", 0))
+	else:
+		game_seed = int(config.get("seed", get_tree().get_meta("game_seed", 0)))
 
 	rng.seed = game_seed
 
 	_log("Seed: %d" % game_seed, "#ffd166")
 	_log("Player 1 (White): %s" % player1_name)
 	_log("Player 2 (Black): %s\n" % player2_name)
+
 func _spawn_pieces() -> void:
 	if preset_path != "" and _spawn_from_file(preset_path):
 		return
@@ -87,7 +102,43 @@ func _spawn_pieces() -> void:
 		_spawn("black", "pawn", Vector2i(x, 1))
 		_spawn("white", "pawn", Vector2i(x, 6))
 		_spawn("white", back_rank[x], Vector2i(x, 7))
+func _apply_seeded_rules() -> void:
 
+	# FEATURE 1: Randomize a sliding piece's range.
+	var sliding_pieces := ["rook", "bishop", "queen"]
+	var chosen_piece: String = sliding_pieces[rng.randi_range(0, 2)]
+
+	if rules.has(chosen_piece):
+		var rule: MoveRule = rules[chosen_piece]
+		rule.max_range = rng.randi_range(2, 7)
+
+		_log(
+			"%s range: %d" % [chosen_piece.capitalize(), rule.max_range],
+			"#ffd166"
+		)
+
+	# FEATURE 2: Randomize the pawn's first move distance.
+	if rules.has("pawn"):
+		var pawn_rule: MoveRule = rules["pawn"]
+		pawn_rule.first_move_range = rng.randi_range(2, 3)
+
+		_log(
+			"Pawn first move range: %d" % pawn_rule.first_move_range,
+			"#ffd166"
+		)
+
+	# FEATURE 3: Give a randomly selected sliding piece the ability to jump.
+	var jump_pieces := ["rook", "bishop"]
+	var jump_piece: String = jump_pieces[rng.randi_range(0, 1)]
+
+	if rules.has(jump_piece):
+		var jump_rule: MoveRule = rules[jump_piece]
+		jump_rule.jumps = true
+
+		_log(
+			"%s can jump over pieces!" % jump_piece.capitalize(),
+			"#ffd166"
+		)
 
 func _spawn_from_file(path: String) -> bool:
 	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -215,7 +266,7 @@ func _log(text: String, color := "#7cfc7c") -> void:
 
 func _log_move(
 	p: AnimatedSprite2D,
-	from: Vector2i,
+	_from: Vector2i,
 	to: Vector2i,
 	victim_type: String
 ) -> void:
@@ -258,3 +309,9 @@ func _update_status() -> void:
 			_current_player_name(),
 			turn.capitalize()
 		]
+
+
+func _on_settings_pressed() -> void:
+	var settings = SETTINGS_SCENE.instantiate()
+	get_tree().root.add_child(settings)
+	settings.call("setup", self)

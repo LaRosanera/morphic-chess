@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://dnmqhtnd7meaj" path="res://scripts/chess/move_rule.gd" id="2_rule"]
 [ext_resource type="PackedScene" uid="uid://cjfrjvuevputu" path="res://Scenes/Chess/classic_black_piece.tscn" id="3_p7jj0"]
 [ext_resource type="PackedScene" uid="uid://cg32l7wtisebm" path="res://Scenes/Chess/classic_white_piece.tscn" id="4_black"]
+[ext_resource type="Texture2D" uid="uid://d017x0hfnqxvm" path="res://assets/icons/settings_icon_cropped.svg" id="6_7jloy"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tiles"]
 texture = ExtResource("1_tiles")
@@ -134,6 +135,15 @@ offset_right = 504.0
 offset_bottom = 548.0
 text = "Restart"
 
+[node name="settings" type="Button" parent="UI" unique_id=878739827]
+layout_mode = 0
+offset_left = 385.0
+offset_top = 514.0
+offset_right = 438.0
+offset_bottom = 567.0
+scale = Vector2(0.7, 0.7)
+icon = ExtResource("6_7jloy")
+
 [node name="PromotionPicker" type="HBoxContainer" parent="UI" unique_id=1143925627]
 visible = false
 layout_mode = 0
@@ -164,3 +174,4 @@ layout_mode = 2
 text = "Knight"
 
 [connection signal="pressed" from="UI/Restart" to="." method="restart"]
+[connection signal="pressed" from="UI/settings" to="." method="restart"]

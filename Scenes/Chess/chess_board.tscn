@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://dnmqhtnd7meaj" path="res://scripts/chess/move_rule.gd" id="2_rule"]
 [ext_resource type="PackedScene" uid="uid://cjfrjvuevputu" path="res://Scenes/Chess/classic_black_piece.tscn" id="3_p7jj0"]
 [ext_resource type="PackedScene" uid="uid://cg32l7wtisebm" path="res://Scenes/Chess/classic_white_piece.tscn" id="4_black"]
-[ext_resource type="Texture2D" uid="uid://d017x0hfnqxvm" path="res://assets/icons/settings_icon_cropped.svg" id="6_7jloy"]
+[ext_resource type="Texture2D" uid="uid://d017x0hfnqxvm" path="res://assets/icons/settings_icon.svg" id="6_7jloy"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tiles"]
 texture = ExtResource("1_tiles")
@@ -92,6 +92,13 @@ directions = Array[Vector2i]([Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), V
 layout_mode = 3
 anchors_preset = 0
 mouse_filter = 2
+
+[node name="ColorRect" type="ColorRect" parent="UI" unique_id=854760346]
+z_index = -1
+layout_mode = 0
+offset_right = 769.0
+offset_bottom = 548.0
+color = Color(0.2031858, 0.23025677, 0.28479365, 1)
 
 [node name="Status" type="Label" parent="UI" unique_id=694311489]
 layout_mode = 0

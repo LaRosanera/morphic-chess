@@ -260,6 +260,7 @@ func _go_back() -> void:
 	if error != OK:
 		_set_transitioning(false)
 		status_label.text = "COULD NOT RETURN TO TITLE SCREEN"
+	
 
 
 func _set_transitioning(value: bool) -> void:

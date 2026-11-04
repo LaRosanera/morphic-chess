@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://bqd4qxf4oynm8"]
 
 [ext_resource type="Script" uid="uid://bt6eqnfhj6le7" path="res://scripts/main/settings.gd" id="1_lgwr1"]
+[ext_resource type="Texture2D" uid="uid://8n476savhrbw" path="res://assets/icons/rose_vine.svg" id="2_0rwlq"]
 
 [node name="SettingsMenu" type="Control" unique_id=2112605759]
 layout_mode = 3
@@ -45,6 +46,7 @@ theme_override_constants/separation = 12
 
 [node name="Header" type="HBoxContainer" parent="Center/Panel/Margin/Main" unique_id=1755188629]
 layout_mode = 2
+offset_transform_enabled = true
 
 [node name="Title" type="Label" parent="Center/Panel/Margin/Main/Header" unique_id=1448069198]
 layout_mode = 2
@@ -54,7 +56,12 @@ text = "MORPHIC CHESS — SETTINGS"
 
 [node name="Close" type="Button" parent="Center/Panel/Margin/Main/Header" unique_id=600830286]
 layout_mode = 2
+offset_transform_enabled = true
+offset_transform_position = Vector2(-10, 10)
+offset_transform_pivot_ratio = Vector2(0, 0.5)
+offset_transform_visual_only = false
 text = "X"
+icon_alignment = 1
 
 [node name="Tabs" type="TabContainer" parent="Center/Panel/Margin/Main" unique_id=1993447441]
 layout_mode = 2
@@ -173,6 +180,11 @@ text = "Main Menu"
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Quit Game"
+
+[node name="RoseVine" type="Sprite2D" parent="." unique_id=628104367]
+position = Vector2(708, 40)
+scale = Vector2(0.06, 0.06)
+texture = ExtResource("2_0rwlq")
 
 [connection signal="pressed" from="Center/Panel/Margin/Main/Header/Close" to="." method="_on_close_pressed"]
 [connection signal="pressed" from="Center/Panel/Margin/Main/Footer/MainMenu" to="." method="_on_main_menu_pressed"]

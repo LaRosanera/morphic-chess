@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://sopqo7erh32j"]
 
 [ext_resource type="Script" uid="uid://beri8150iuoh5" path="res://scripts/main/title_screen.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://8n476savhrbw" path="res://assets/icons/rose_vine.svg" id="2_4q7xn"]
+[ext_resource type="Texture2D" uid="uid://cfh1fipvix4cm" path="res://assets/icons/signature.svg" id="3_korwd"]
 
 [node name="TitleScreen" type="Control" unique_id=661133958]
 layout_mode = 3
@@ -38,77 +40,18 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Block1" type="ColorRect" parent="MenuCanvas" unique_id=243742556]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 192.0
-offset_bottom = 36.0
-mouse_filter = 2
-color = Color(0.157, 0.216, 0.278, 1)
+[node name="RoseVine" type="Sprite2D" parent="MenuCanvas" unique_id=1988233637]
+modulate = Color(0.5963672, 0.59636724, 0.59636724, 1)
+position = Vector2(634, 132)
+scale = Vector2(0.20102075, 0.19384372)
+texture = ExtResource("2_4q7xn")
 
-[node name="Block2" type="ColorRect" parent="MenuCanvas" unique_id=96939144]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 36.0
-offset_bottom = 136.0
-mouse_filter = 2
-color = Color(0.157, 0.216, 0.278, 1)
-
-[node name="Block3" type="ColorRect" parent="MenuCanvas" unique_id=514926861]
-layout_mode = 0
-offset_left = 576.0
-offset_top = 24.0
-offset_right = 744.0
-offset_bottom = 36.0
-mouse_filter = 2
-color = Color(0.157, 0.216, 0.278, 1)
-
-[node name="Block4" type="ColorRect" parent="MenuCanvas" unique_id=1201881169]
-layout_mode = 0
-offset_left = 732.0
-offset_top = 24.0
-offset_right = 744.0
-offset_bottom = 136.0
-mouse_filter = 2
-color = Color(0.157, 0.216, 0.278, 1)
-
-[node name="Block5" type="ColorRect" parent="MenuCanvas" unique_id=2026374098]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 516.0
-offset_right = 192.0
-offset_bottom = 528.0
-mouse_filter = 2
-color = Color(0.157, 0.216, 0.278, 1)
-
-[node name="Block6" type="ColorRect" parent="MenuCanvas" unique_id=441594552]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 416.0
-offset_right = 36.0
-offset_bottom = 528.0
-mouse_filter = 2
-color = Color(0.157, 0.216, 0.278, 1)
-
-[node name="Block7" type="ColorRect" parent="MenuCanvas" unique_id=393590220]
-layout_mode = 0
-offset_left = 576.0
-offset_top = 516.0
-offset_right = 744.0
-offset_bottom = 528.0
-mouse_filter = 2
-color = Color(0.157, 0.216, 0.278, 1)
-
-[node name="Block8" type="ColorRect" parent="MenuCanvas" unique_id=743903632]
-layout_mode = 0
-offset_left = 732.0
-offset_top = 416.0
-offset_right = 744.0
-offset_bottom = 528.0
-mouse_filter = 2
-color = Color(0.157, 0.216, 0.278, 1)
+[node name="RoseVine2" type="Sprite2D" parent="MenuCanvas" unique_id=1712184116]
+modulate = Color(0.5963672, 0.59636724, 0.59636724, 1)
+position = Vector2(133, 138)
+rotation = -1.5707964
+scale = Vector2(0.20102075, 0.19384372)
+texture = ExtResource("2_4q7xn")
 
 [node name="Shadow" type="ColorRect" parent="MenuCanvas" unique_id=1864192868]
 layout_mode = 0
@@ -141,7 +84,7 @@ theme_override_constants/separation = 10
 layout_mode = 2
 theme_override_colors/font_color = Color(0.494, 0.988, 0.494, 1)
 theme_override_font_sizes/font_size = 12
-text = "[ STRATEGY SYSTEM / 01 ]"
+text = "THE RULES KEEP CHANGING"
 horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="MenuCanvas/Panel/Margin/Content" unique_id=446151623]
@@ -178,9 +121,7 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "QUIT"
 
-[node name="StatusLabel" type="Label" parent="MenuCanvas/Panel/Margin/Content" unique_id=79888886]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.494, 0.988, 0.494, 1)
-theme_override_font_sizes/font_size = 11
-text = "By Rosanera"
-horizontal_alignment = 1
+[node name="Signature" type="Sprite2D" parent="MenuCanvas" unique_id=916819228]
+position = Vector2(385, 400)
+scale = Vector2(0.43, 0.5)
+texture = ExtResource("3_korwd")

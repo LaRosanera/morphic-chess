@@ -35,7 +35,7 @@ var turn := "white"
 var selected: AnimatedSprite2D
 var promoting: AnimatedSprite2D
 var over := false
-var _pending_name := ""
+var _pending_name := "Classic"
 var player1_name := "White"
 var player2_name := "Black"
 

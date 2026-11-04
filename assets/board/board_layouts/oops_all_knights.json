@@ -1,0 +1,13 @@
+{
+  "name": "Oops All Knights",
+  "board": [
+	"nnnnknnn",
+	"nnnnnnnn",
+	"........",
+	"........",
+	"........",
+	"........",
+	"NNNNNNNN",
+    "NNNNKNNN"
+  ]
+}

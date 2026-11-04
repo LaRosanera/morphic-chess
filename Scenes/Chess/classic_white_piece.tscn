@@ -6,6 +6,10 @@
 atlas = ExtResource("1_opad5")
 region = Rect2(90, 0, 45, 45)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_1qswf"]
+atlas = ExtResource("1_opad5")
+region = Rect2(135, 0, 45, 45)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_q8wna"]
 atlas = ExtResource("1_opad5")
 region = Rect2(0, 0, 45, 45)
@@ -13,6 +17,10 @@ region = Rect2(0, 0, 45, 45)
 [sub_resource type="AtlasTexture" id="AtlasTexture_gpf22"]
 atlas = ExtResource("1_opad5")
 region = Rect2(135, 0, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f7vg5"]
+atlas = ExtResource("1_opad5")
+region = Rect2(0, 0, 45, 45)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_opad5"]
 atlas = ExtResource("1_opad5")
@@ -38,6 +46,14 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_1qswf")
+}],
+"loop": 1,
+"name": &"white_camel",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_q8wna")
 }],
 "loop": 1,
@@ -51,6 +67,14 @@ animations = [{
 "loop": 1,
 "name": &"white_knight",
 "speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f7vg5")
+}],
+"loop": 1,
+"name": &"white_man",
+"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -80,4 +104,4 @@ animations = [{
 [node name="classic_white_piece" type="AnimatedSprite2D" unique_id=1731590654]
 texture_filter = 2
 sprite_frames = SubResource("SpriteFrames_bhunq")
-animation = &"white_rook"
+animation = &"white_man"

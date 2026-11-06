@@ -1,6 +1,11 @@
 [gd_scene format=3 uid="uid://cg32l7wtisebm"]
 
 [ext_resource type="Texture2D" uid="uid://b5v3dlo7rle48" path="res://assets/pieces/classic/Chess_Pieces_Sprite.svg" id="1_opad5"]
+[ext_resource type="Texture2D" uid="uid://cc3pqckyi881" path="res://assets/pieces/classic/Chess_Pieces_Custom_Sprite.svg" id="2_eock1"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e3un8"]
+atlas = ExtResource("2_eock1")
+region = Rect2(55, 10, 45, 45)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eock1"]
 atlas = ExtResource("1_opad5")
@@ -9,6 +14,14 @@ region = Rect2(90, 0, 45, 45)
 [sub_resource type="AtlasTexture" id="AtlasTexture_1qswf"]
 atlas = ExtResource("1_opad5")
 region = Rect2(135, 0, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mvga0"]
+atlas = ExtResource("2_eock1")
+region = Rect2(10, 10, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o7t15"]
+atlas = ExtResource("2_eock1")
+region = Rect2(143, 10, 45, 45)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_q8wna"]
 atlas = ExtResource("1_opad5")
@@ -22,9 +35,17 @@ region = Rect2(135, 0, 45, 45)
 atlas = ExtResource("1_opad5")
 region = Rect2(0, 0, 45, 45)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_0raja"]
+atlas = ExtResource("1_opad5")
+region = Rect2(45, 0, 45, 45)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_opad5"]
 atlas = ExtResource("1_opad5")
 region = Rect2(225, 0, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y6ig7"]
+atlas = ExtResource("2_eock1")
+region = Rect2(100, 10, 45, 45)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ygdck"]
 atlas = ExtResource("1_opad5")
@@ -36,6 +57,14 @@ region = Rect2(180, 0, 45, 45)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_bhunq"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e3un8")
+}],
+"loop": 1,
+"name": &"white_amazon",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_eock1")
@@ -50,6 +79,22 @@ animations = [{
 }],
 "loop": 1,
 "name": &"white_camel",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mvga0")
+}],
+"loop": 1,
+"name": &"white_elephant",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o7t15")
+}],
+"loop": 1,
+"name": &"white_empress",
 "speed": 5.0
 }, {
 "frames": [{
@@ -78,11 +123,27 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_0raja")
+}],
+"loop": 1,
+"name": &"white_minister",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_opad5")
 }],
 "loop": 1,
 "name": &"white_pawn",
 "speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y6ig7")
+}],
+"loop": 1,
+"name": &"white_princess",
+"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -104,4 +165,4 @@ animations = [{
 [node name="classic_white_piece" type="AnimatedSprite2D" unique_id=1731590654]
 texture_filter = 2
 sprite_frames = SubResource("SpriteFrames_bhunq")
-animation = &"white_man"
+animation = &"white_minister"

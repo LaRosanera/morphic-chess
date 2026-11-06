@@ -94,6 +94,7 @@ anchors_preset = 0
 mouse_filter = 2
 
 [node name="ColorRect" type="ColorRect" parent="UI" unique_id=854760346]
+visible = false
 z_index = -1
 layout_mode = 0
 offset_right = 769.0

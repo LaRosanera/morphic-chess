@@ -1,6 +1,11 @@
 [gd_scene format=3 uid="uid://cjfrjvuevputu"]
 
 [ext_resource type="Texture2D" uid="uid://b5v3dlo7rle48" path="res://assets/pieces/classic/Chess_Pieces_Sprite.svg" id="1_opad5"]
+[ext_resource type="Texture2D" uid="uid://cc3pqckyi881" path="res://assets/pieces/classic/Chess_Pieces_Custom_Sprite.svg" id="1_t7322"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tbg2i"]
+atlas = ExtResource("1_t7322")
+region = Rect2(55, 55, 45, 45)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eock1"]
 atlas = ExtResource("1_opad5")
@@ -10,6 +15,14 @@ region = Rect2(90, 45, 45, 45)
 atlas = ExtResource("1_opad5")
 region = Rect2(135, 45, 45, 45)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_jp2s2"]
+atlas = ExtResource("1_t7322")
+region = Rect2(10, 55, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jyuoy"]
+atlas = ExtResource("1_t7322")
+region = Rect2(143, 55, 45, 45)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_q8wna"]
 atlas = ExtResource("1_opad5")
 region = Rect2(0, 45, 45, 45)
@@ -18,9 +31,17 @@ region = Rect2(0, 45, 45, 45)
 atlas = ExtResource("1_opad5")
 region = Rect2(0, 45, 45, 45)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_yl7yc"]
+atlas = ExtResource("1_opad5")
+region = Rect2(45, 45, 45, 45)
+
 [sub_resource type="AtlasTexture" id="AtlasTexture_opad5"]
 atlas = ExtResource("1_opad5")
 region = Rect2(225, 45, 45, 45)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y1p4n"]
+atlas = ExtResource("1_t7322")
+region = Rect2(100, 55, 45, 45)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ygdck"]
 atlas = ExtResource("1_opad5")
@@ -32,6 +53,14 @@ region = Rect2(180, 45, 45, 45)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_bhunq"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tbg2i")
+}],
+"loop": 1,
+"name": &"black_amazon",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_eock1")
@@ -46,6 +75,22 @@ animations = [{
 }],
 "loop": 1,
 "name": &"black_camel",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jp2s2")
+}],
+"loop": 1,
+"name": &"black_elephant",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jyuoy")
+}],
+"loop": 1,
+"name": &"black_empress",
 "speed": 5.0
 }, {
 "frames": [{
@@ -74,11 +119,27 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_yl7yc")
+}],
+"loop": 1,
+"name": &"black_minister",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_opad5")
 }],
 "loop": 1,
 "name": &"black_pawn",
 "speed": 0.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y1p4n")
+}],
+"loop": 1,
+"name": &"black_princess",
+"speed": 5.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -100,4 +161,4 @@ animations = [{
 [node name="classic_black_piece" type="AnimatedSprite2D" unique_id=1731590654]
 texture_filter = 2
 sprite_frames = SubResource("SpriteFrames_bhunq")
-animation = &"black_man"
+animation = &"black_knight"

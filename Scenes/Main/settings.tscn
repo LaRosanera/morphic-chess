@@ -58,8 +58,6 @@ text = "MORPHIC CHESS — SETTINGS"
 layout_mode = 2
 offset_transform_enabled = true
 offset_transform_position = Vector2(-10, 10)
-offset_transform_pivot_ratio = Vector2(0, 0.5)
-offset_transform_visual_only = false
 text = "X"
 icon_alignment = 1
 

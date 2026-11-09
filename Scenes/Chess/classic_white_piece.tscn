@@ -165,4 +165,4 @@ animations = [{
 [node name="classic_white_piece" type="AnimatedSprite2D" unique_id=1731590654]
 texture_filter = 2
 sprite_frames = SubResource("SpriteFrames_bhunq")
-animation = &"white_minister"
+animation = &"white_rook"

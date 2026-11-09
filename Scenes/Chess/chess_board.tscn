@@ -4,8 +4,47 @@
 [ext_resource type="Texture2D" uid="uid://cdi0pqhp6mtp4" path="res://assets/board/chess_board_tiles.svg" id="1_tiles"]
 [ext_resource type="Script" uid="uid://dnmqhtnd7meaj" path="res://scripts/chess/move_rule.gd" id="2_rule"]
 [ext_resource type="PackedScene" uid="uid://cjfrjvuevputu" path="res://Scenes/Chess/classic_black_piece.tscn" id="3_p7jj0"]
+[ext_resource type="Texture2D" uid="uid://8n476savhrbw" path="res://assets/icons/rose_vine.svg" id="4_2jdv2"]
 [ext_resource type="PackedScene" uid="uid://cg32l7wtisebm" path="res://Scenes/Chess/classic_white_piece.tscn" id="4_black"]
 [ext_resource type="Texture2D" uid="uid://d017x0hfnqxvm" path="res://assets/icons/settings_icon.svg" id="6_7jloy"]
+
+[sub_resource type="Animation" id="Animation_2jdv2"]
+resource_name = "GLOW"
+length = 12.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 4, 8.033334, 11.992666),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(0.33333334, 0.3529412, 0.43137255, 1), Color(0.43529412, 0.34509805, 0.3529412, 1), Color(0.15686275, 0.22745098, 0.39215687, 1), Color(0.33333334, 0.3529412, 0.43137255, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_mp02x"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(0.33333334, 0.3529412, 0.43137255, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_rsi80"]
+_data = {
+&"GLOW": SubResource("Animation_2jdv2"),
+&"RESET": SubResource("Animation_mp02x")
+}
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tiles"]
 texture = ExtResource("1_tiles")
@@ -21,6 +60,38 @@ sources/0 = SubResource("TileSetAtlasSource_tiles")
 script = ExtResource("1_bn2q4")
 white_piece_scene = ExtResource("4_black")
 black_piece_scene = ExtResource("3_p7jj0")
+
+[node name="background" type="Control" parent="." unique_id=249161753]
+modulate = Color(0.33333334, 0.3529412, 0.43137255, 1)
+z_index = -100
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="ColorRect" type="ColorRect" parent="background" unique_id=854760346]
+layout_mode = 0
+offset_right = 769.0
+offset_bottom = 560.0
+mouse_filter = 2
+color = Color(0.6134626, 0.64804935, 0.73601794, 1)
+
+[node name="RoseVine" type="Sprite2D" parent="background" unique_id=798198188]
+position = Vector2(215, 319)
+rotation = 3.1415927
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("4_2jdv2")
+
+[node name="RoseVine2" type="Sprite2D" parent="background" unique_id=799838284]
+position = Vector2(551.00006, 219.00003)
+rotation = 0.024152279
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("4_2jdv2")
+
+[node name="GLOW" type="AnimationPlayer" parent="background" unique_id=1115963940]
+libraries/ = SubResource("AnimationLibrary_rsi80")
+autoplay = &"GLOW"
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1251295748]
 tile_set = SubResource("TileSet_chess")
@@ -92,14 +163,6 @@ directions = Array[Vector2i]([Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), V
 layout_mode = 3
 anchors_preset = 0
 mouse_filter = 2
-
-[node name="ColorRect" type="ColorRect" parent="UI" unique_id=854760346]
-visible = false
-z_index = -1
-layout_mode = 0
-offset_right = 769.0
-offset_bottom = 548.0
-color = Color(0.2031858, 0.23025677, 0.28479365, 1)
 
 [node name="Status" type="Label" parent="UI" unique_id=694311489]
 layout_mode = 0

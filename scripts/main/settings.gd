@@ -56,7 +56,7 @@ func _refresh_game_info() -> void:
 	for piece_type in chess_board.rules:
 		var rule = chess_board.rules[piece_type]
 
-		lines.append("[color=yellow]%s[/color]" % piece_type.capitalize())
+		lines.append("[color=CADET_BLUE]%s[/color]" % piece_type.capitalize())
 		lines.append("Maximum range: %d" % rule.max_range)
 		lines.append("First move range: %d" % rule.first_move_range)
 		lines.append("Can jump: %s" % str(rule.jumps))

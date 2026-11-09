@@ -2,8 +2,9 @@
 extends Control
 
 const SETUP_SCENE := "res://scenes/main/game_setup.tscn"
-const PIECE_TEXTURE_PATH := "res://assets/pieces/classic/Chess_Pieces_Sprite.svg"
-
+const white_piece_scene = "res://Scenes/Chess/classic_white_piece.tscn"
+const black_piece_scene = "res://Scenes/Chess/classic_black_piece.tscn"
+const daily_seed_path = "res://data/daily_seed.json"
 @export var motion_speed: float = 0.65
 
 @onready var piece_layer: Node2D = $PieceLayer
@@ -12,14 +13,14 @@ const PIECE_TEXTURE_PATH := "res://assets/pieces/classic/Chess_Pieces_Sprite.svg
 @onready var quit_button: Button = $MenuCanvas/Panel/Margin/Content/QuitButton
 @onready var status_label: Label = $MenuCanvas/Panel/Margin/Content/StatusLabel
 @onready var panel: PanelContainer = $MenuCanvas/Panel
-
+@onready var seed_label: Label = $MenuCanvas/Panel/Margin/Content/SeedLabel
 var elapsed := 0.0
 var reduced_motion := false
 var transitioning := false
 
 var rng := RandomNumberGenerator.new()
 
-var pieces: Array[Sprite2D] = []
+var pieces: Array[Node2D] = []
 var origins: Array[Vector2] = []
 var phases: Array[float] = []
 var scales: Array[float] = []
@@ -40,7 +41,8 @@ func _ready() -> void:
 	_create_pieces()
 
 	play_button.grab_focus()
-
+	var data = JSON.parse_string(FileAccess.get_file_as_string(daily_seed_path))
+	seed_label.text = " DAILY SEED: %s" % str(data)
 
 func _apply_styles() -> void:
 	panel.add_theme_stylebox_override(
@@ -89,64 +91,59 @@ func _style(fill: Color, border: Color) -> StyleBoxFlat:
 	style.content_margin_bottom = 8
 	return style
 
-
+# There are 12 pieces in an animated sprite for both classic black pieces and white ones. I need you to edit this file so it loads 12 x 3. just everything in the file and have them randomly positoned. it should be around 72 in total because you double for black pieces. 
 func _create_pieces() -> void:
-	var atlas := load(PIECE_TEXTURE_PATH) as Texture2D
+	var copies_per_piece := 3
 
-	if atlas == null:
-		status_label.text = "ARTWORK ERROR / CHECK SPRITESHEET PATH"
-		return
+	# Load both scenes once.
+	var packed_scenes: Array[PackedScene] = []
+	for path in [white_piece_scene, black_piece_scene]:
+		var packed := load(path) as PackedScene
+		if packed == null:
+			status_label.text = "ARTWORK ERROR / CHECK PIECE SCENE PATHS"
+			return
+		packed_scenes.append(packed)
 
-	# King, queen, bishop, knight, rook, pawn.
-	var army_columns: Array[int] = [
-		4, 3, 2, 1, 0, 2, 3, 4,
-		5, 5, 5, 5, 5, 5, 5, 5
-	]
+	# Build (scene index, animation name) specs from each scene's own animations.
+	var specs: Array[Dictionary] = []
+	for scene_index in range(packed_scenes.size()):
+		var probe := packed_scenes[scene_index].instantiate() as AnimatedSprite2D
+		var names: PackedStringArray = probe.sprite_frames.get_animation_names()
+		probe.free()
 
-	# Shuffle 64 positions.
+		for anim_name in names:
+			for copy in range(copies_per_piece):
+				specs.append({"scene": scene_index, "anim": anim_name})
+
+	var total := specs.size()
+
+	# Shuffle grid cells so the layout is random but doesn't clump.
+	var columns := 9
+	var rows := int(ceil(float(total) / columns))
 	var cells: Array[int] = []
-
-	for i in range(64):
+	for i in range(total):
 		cells.append(i)
 
-	for i in range(63, 0, -1):
+	for i in range(total - 1, 0, -1):
 		var other := rng.randi_range(0, i)
 		var temp := cells[i]
 		cells[i] = cells[other]
 		cells[other] = temp
 
-	for i in range(64):
-		var side := (i / 16) % 2
-		var column := army_columns[i % 16]
-
-		var texture := AtlasTexture.new()
-		texture.atlas = atlas
-		texture.region = Rect2(
-			column * 45.0,
-			side * 45.0,
-			45.0,
-			45.0
-		)
-
-		var sprite := Sprite2D.new()
-		sprite.texture = texture
-		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		sprite.modulate = Color(
-			0.8,
-			0.9,
-			1.0,
-			rng.randf_range(0.22, 0.48)
-		)
-
+	for i in range(total):
+		var spec := specs[i]
+		var sprite := packed_scenes[spec["scene"]].instantiate() as AnimatedSprite2D
+		sprite.animation = spec["anim"]
+		sprite.stop()
+		sprite.modulate = Color(0.8, 0.9, 1.0, rng.randf_range(0.22, 0.48))
 		piece_layer.add_child(sprite)
 
 		var cell := cells[i]
-
 		pieces.append(sprite)
 
 		origins.append(Vector2(
-			(float(cell % 8) + rng.randf_range(0.15, 0.85)) / 8.0,
-			(float(cell / 8) + rng.randf_range(0.15, 0.85)) / 8.0
+			(float(cell % columns) + rng.randf_range(0.15, 0.85)) / float(columns),
+			(float(cell / columns) + rng.randf_range(0.15, 0.85)) / float(rows)
 		))
 
 		phases.append(rng.randf_range(0.0, TAU))
@@ -154,6 +151,14 @@ func _create_pieces() -> void:
 
 	_update_pieces()
 
+func _find_animated_sprite(node: Node) -> AnimatedSprite2D:
+	if node is AnimatedSprite2D:
+		return node
+	for child in node.get_children():
+		var found := _find_animated_sprite(child)
+		if found != null:
+			return found
+	return null
 
 func _process(delta: float) -> void:
 	if not reduced_motion:
@@ -205,3 +210,4 @@ func _open_setup() -> void:
 
 func _quit_game() -> void:
 	get_tree().quit()
+# ERROR: They are being spawned in, but not moving and being positioned. 

@@ -66,6 +66,100 @@ theme_override_colors/font_color = Color(0.494, 0.988, 0.494, 1)
 theme_override_font_sizes/font_size = 12
 text = "LOCAL TWO-PLAYER / STANDARD STARTING POSITION"
 
+[node name="classic_black_piece" parent="Center/Panel/Margin/Content/Header" unique_id=1731590654 instance=ExtResource("3_2lmj7")]
+position = Vector2(339.5, 14.5)
+
+[node name="classic_white_piece" parent="Center/Panel/Margin/Content/Header" unique_id=992149441 instance=ExtResource("4_0to1n")]
+position = Vector2(385.5, 15.5)
+animation = &"white_king"
+
+[node name="ModeTabs" type="HBoxContainer" parent="Center/Panel/Margin/Content" unique_id=199926191]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LocalTab" type="Button" parent="Center/Panel/Margin/Content/ModeTabs" unique_id=1527480442]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+button_pressed = true
+text = "LOCAL"
+
+[node name="OnlineTab" type="Button" parent="Center/Panel/Margin/Content/ModeTabs" unique_id=815506896]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+toggle_mode = true
+text = "ONLINE"
+
+[node name="OnlineFields" type="GridContainer" parent="Center/Panel/Margin/Content" unique_id=386224473]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 12
+columns = 2
+
+[node name="NameField" type="VBoxContainer" parent="Center/Panel/Margin/Content/OnlineFields" unique_id=2116873168]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/Content/OnlineFields/NameField" unique_id=1378819212]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "YOUR NAME"
+
+[node name="OnlineName" type="LineEdit" parent="Center/Panel/Margin/Content/OnlineFields/NameField" unique_id=1406405038]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+placeholder_text = "Player"
+max_length = 24
+
+[node name="RoleField" type="VBoxContainer" parent="Center/Panel/Margin/Content/OnlineFields" unique_id=1609216055]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/Content/OnlineFields/RoleField" unique_id=1354925326]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "CONNECTION"
+
+[node name="RoleSelect" type="OptionButton" parent="Center/Panel/Margin/Content/OnlineFields/RoleField" unique_id=2016681891]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+
+[node name="IpField" type="VBoxContainer" parent="Center/Panel/Margin/Content/OnlineFields" unique_id=744243803]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/Content/OnlineFields/IpField" unique_id=1996031054]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "HOST IP ADDRESS"
+
+[node name="IpInput" type="LineEdit" parent="Center/Panel/Margin/Content/OnlineFields/IpField" unique_id=840508852]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+placeholder_text = "e.g. 203.0.113.5"
+max_length = 64
+
+[node name="PortField" type="VBoxContainer" parent="Center/Panel/Margin/Content/OnlineFields" unique_id=853398760]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Label" type="Label" parent="Center/Panel/Margin/Content/OnlineFields/PortField" unique_id=434593374]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "PORT"
+
+[node name="PortInput" type="LineEdit" parent="Center/Panel/Margin/Content/OnlineFields/PortField" unique_id=32915418]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "7777"
+placeholder_text = "7777"
+max_length = 5
+
 [node name="Fields" type="GridContainer" parent="Center/Panel/Margin/Content" unique_id=1542209568]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -192,14 +286,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "START GAME  >"
 
-[node name="RoseVine" type="Sprite2D" parent="." unique_id=26981219]
-position = Vector2(594, 164.00002)
-scale = Vector2(0.2, 0.2)
+[node name="RoseVine" type="Sprite2D" parent="Center/Panel/Margin" unique_id=26981219]
+position = Vector2(621, 73)
+scale = Vector2(0.11515152, 0.11993622)
 texture = ExtResource("2_5vpf3")
-
-[node name="classic_black_piece" parent="." unique_id=1731590654 instance=ExtResource("3_2lmj7")]
-position = Vector2(517, 323)
-
-[node name="classic_white_piece" parent="." unique_id=992149441 instance=ExtResource("4_0to1n")]
-position = Vector2(563, 324)
-animation = &"white_king"

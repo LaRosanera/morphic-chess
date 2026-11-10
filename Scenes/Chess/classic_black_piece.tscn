@@ -161,4 +161,4 @@ animations = [{
 [node name="classic_black_piece" type="AnimatedSprite2D" unique_id=1731590654]
 texture_filter = 2
 sprite_frames = SubResource("SpriteFrames_bhunq")
-animation = &"black_knight"
+animation = &"black_queen"

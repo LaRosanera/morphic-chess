@@ -10,11 +10,24 @@ extends Node2D
 	"rook", "knight", "bishop", "queen",
 	"king", "bishop", "knight", "rook"
 ]
-
+const PIECE_PITCHES := {
+	"pawn": -6,      # C4
+	"knight": -5,    # C#4
+	"bishop": -4,    # D4
+	"rook": -3,      # D#4
+	"queen": -2,     # E4
+	"king": -1,      # F4
+	"amazon": 0,     # F#4
+	"camel": 1,      # G4
+	"elephant": 2,   # G#4
+	"empress": 3,    # A4
+	"princess": 4,   # A#4
+	"man": 5,        # B4
+	"minister": 6    # C5
+}
 const SETTINGS_SCENE = preload("res://Scenes/Main/settings.tscn")
 const SETUP_SCENE := "res://Scenes/Main/game_setup.tscn"
 const DEFAULT_PRESET := "res://assets/board/board_layouts/everything.json"
-
 ## Static so it survives restart() reloading the scene.
 static var preset_path := DEFAULT_PRESET
 
@@ -24,7 +37,7 @@ static var preset_path := DEFAULT_PRESET
 @onready var status: Label = $UI/Status
 @onready var picker: Control = $UI/PromotionPicker
 @onready var log_box: RichTextLabel = $UI/Terminal/Log
-
+@onready var piano_key_player: AudioStreamPlayer2D = $piano_key_player
 var daily_changes: Array[String] = []
 
 var player1_name := "White"
@@ -287,7 +300,6 @@ func _submit_move(from: Vector2i, to: Vector2i, promo: String) -> void:
 	_deselect()
 	_online_sync.submit(from, to, promo)
 
-
 func _apply_move(from: Vector2i, to: Vector2i, promo: String) -> void:
 	var piece: AnimatedSprite2D = grid.get(from)
 	if piece == null:
@@ -296,6 +308,13 @@ func _apply_move(from: Vector2i, to: Vector2i, promo: String) -> void:
 	awaiting_result = false
 	pending_promo.clear()
 	_promotion_ui.hide()
+
+	var piece_type := MoveRule.type_of(piece)
+	var semitones: int = PIECE_PITCHES.get(piece_type, 0)
+	print(MoveRule.type_of(piece))
+	piano_key_player.pitch_scale = pow(2.0, float(semitones) / 12.0)
+	print(piano_key_player.pitch_scale)
+	piano_key_player.play()
 
 	var victim_type := _state.move_piece(from, to)
 	_view.slide(piece, to)
@@ -313,7 +332,6 @@ func _apply_move(from: Vector2i, to: Vector2i, promo: String) -> void:
 	_deselect()
 	_state.end_turn()
 	_update_status()
-
 
 func _on_move_rejected() -> void:
 	awaiting_result = false

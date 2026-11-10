@@ -7,6 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://8n476savhrbw" path="res://assets/icons/rose_vine.svg" id="4_2jdv2"]
 [ext_resource type="PackedScene" uid="uid://cg32l7wtisebm" path="res://Scenes/Chess/classic_white_piece.tscn" id="4_black"]
 [ext_resource type="Texture2D" uid="uid://d017x0hfnqxvm" path="res://assets/icons/settings_icon.svg" id="6_7jloy"]
+[ext_resource type="AudioStream" uid="uid://dkbkm3sdafwob" path="res://assets/audio/f#.wav" id="8_mp02x"]
 
 [sub_resource type="Animation" id="Animation_2jdv2"]
 resource_name = "GLOW"
@@ -243,6 +244,11 @@ text = "Bishop"
 custom_minimum_size = Vector2(72, 64)
 layout_mode = 2
 text = "Knight"
+
+[node name="piano_key_player" type="AudioStreamPlayer2D" parent="." unique_id=669132223]
+stream = ExtResource("8_mp02x")
+volume_db = 2.716
+bus = &"SFX"
 
 [connection signal="pressed" from="UI/Restart" to="." method="restart"]
 [connection signal="pressed" from="UI/settings" to="." method="_on_settings_pressed"]

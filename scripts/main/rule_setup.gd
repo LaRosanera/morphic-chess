@@ -114,7 +114,7 @@ static func apply_seeded(
 	game_log: GameLog
 ) -> void:
 	# FEATURE 1: Randomize a standard sliding piece's range.
-	var sliding_pieces := ["rook", "bishop", "queen"]
+	var sliding_pieces := ["rook", "bishop", "queen", "king", "elephant"]
 	var chosen_piece: String = sliding_pieces[
 		rng.randi_range(0, sliding_pieces.size() - 1)
 	]

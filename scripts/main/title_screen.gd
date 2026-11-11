@@ -2,9 +2,13 @@
 extends Control
 
 const SETUP_SCENE := "res://scenes/main/game_setup.tscn"
-const white_piece_scene = "res://Scenes/Chess/classic_white_piece.tscn"
-const black_piece_scene = "res://Scenes/Chess/classic_black_piece.tscn"
-const daily_seed_path = "res://data/daily_seed.json"
+const WHITE_PIECE_SCENE := "res://Scenes/Chess/classic_white_piece.tscn"
+const BLACK_PIECE_SCENE := "res://Scenes/Chess/classic_black_piece.tscn"
+
+const COPIES_PER_PIECE := 3
+const COLUMNS := 9
+const EXPECTED_ANIMATIONS := 12
+
 @export var motion_speed: float = 0.65
 
 @onready var piece_layer: Node2D = $PieceLayer
@@ -14,11 +18,14 @@ const daily_seed_path = "res://data/daily_seed.json"
 @onready var status_label: Label = $MenuCanvas/Panel/Margin/Content/StatusLabel
 @onready var panel: PanelContainer = $MenuCanvas/Panel
 @onready var seed_label: Label = $MenuCanvas/Panel/Margin/Content/SeedLabel
+
 var elapsed := 0.0
 var reduced_motion := false
 var transitioning := false
 
 var rng := RandomNumberGenerator.new()
+
+var daily_seed: int
 
 var pieces: Array[Node2D] = []
 var origins: Array[Vector2] = []
@@ -27,7 +34,22 @@ var scales: Array[float] = []
 
 
 func _ready() -> void:
-	rng.randomize()
+	# Generate today's seed using MMDDYYYY.
+	var date := Time.get_date_dict_from_system()
+
+	daily_seed = int("%02d%02d%04d" % [
+		date["month"],
+		date["day"],
+		date["year"]
+	])
+
+	# Use the date as the random number generator seed.
+	rng.seed = daily_seed
+
+	# Make the seed accessible to other scenes.
+	get_tree().set_meta("daily_seed", daily_seed)
+
+	seed_label.text = " DAILY SEED: %08d" % daily_seed
 
 	_apply_styles()
 
@@ -41,8 +63,7 @@ func _ready() -> void:
 	_create_pieces()
 
 	play_button.grab_focus()
-	var data = JSON.parse_string(FileAccess.get_file_as_string(daily_seed_path))
-	seed_label.text = " DAILY SEED: %s" % str(data)
+
 
 func _apply_styles() -> void:
 	panel.add_theme_stylebox_override(
@@ -91,59 +112,118 @@ func _style(fill: Color, border: Color) -> StyleBoxFlat:
 	style.content_margin_bottom = 8
 	return style
 
-# There are 12 pieces in an animated sprite for both classic black pieces and white ones. I need you to edit this file so it loads 12 x 3. just everything in the file and have them randomly positoned. it should be around 72 in total because you double for black pieces. 
-func _create_pieces() -> void:
-	var copies_per_piece := 3
 
-	# Load both scenes once.
+# Find an AnimatedSprite2D even if it is nested inside another node.
+func _find_animated_sprite(node: Node) -> AnimatedSprite2D:
+	if node is AnimatedSprite2D:
+		return node as AnimatedSprite2D
+
+	for child in node.get_children():
+		var found := _find_animated_sprite(child)
+		if found != null:
+			return found
+
+	return null
+
+
+# Create 3 copies of every animation for both piece sets.
+func _create_pieces() -> void:
 	var packed_scenes: Array[PackedScene] = []
-	for path in [white_piece_scene, black_piece_scene]:
+
+	# Load both piece scenes.
+	for path in [WHITE_PIECE_SCENE, BLACK_PIECE_SCENE]:
 		var packed := load(path) as PackedScene
+
 		if packed == null:
 			status_label.text = "ARTWORK ERROR / CHECK PIECE SCENE PATHS"
 			return
+
 		packed_scenes.append(packed)
 
-	# Build (scene index, animation name) specs from each scene's own animations.
+	# Collect all animation names from both scenes.
 	var specs: Array[Dictionary] = []
+
 	for scene_index in range(packed_scenes.size()):
-		var probe := packed_scenes[scene_index].instantiate() as AnimatedSprite2D
-		var names: PackedStringArray = probe.sprite_frames.get_animation_names()
-		probe.free()
+		var probe := packed_scenes[scene_index].instantiate()
+		var animated_sprite := _find_animated_sprite(probe)
+
+		if animated_sprite == null:
+			probe.free()
+			return
+
+		var names := animated_sprite.sprite_frames.get_animation_names()
+
+		if names.size() != EXPECTED_ANIMATIONS:
+			probe.free()
+			return
 
 		for anim_name in names:
-			for copy in range(copies_per_piece):
-				specs.append({"scene": scene_index, "anim": anim_name})
+			for copy in range(COPIES_PER_PIECE):
+				specs.append({
+					"scene": scene_index,
+					"anim": anim_name
+				})
+
+		probe.free()
 
 	var total := specs.size()
+	var rows := int(ceil(float(total) / float(COLUMNS)))
 
-	# Shuffle grid cells so the layout is random but doesn't clump.
-	var columns := 9
-	var rows := int(ceil(float(total) / columns))
+	# Randomize grid cell assignments.
 	var cells: Array[int] = []
+
 	for i in range(total):
 		cells.append(i)
 
 	for i in range(total - 1, 0, -1):
 		var other := rng.randi_range(0, i)
+
 		var temp := cells[i]
 		cells[i] = cells[other]
 		cells[other] = temp
 
+	# Spawn all pieces.
 	for i in range(total):
-		var spec := specs[i]
-		var sprite := packed_scenes[spec["scene"]].instantiate() as AnimatedSprite2D
+		var spec: Dictionary = specs[i]
+
+		var piece := packed_scenes[spec["scene"]].instantiate() as Node2D
+
+		if piece == null:
+			status_label.text = "ARTWORK ERROR / PIECE ROOT MUST BE NODE2D"
+			return
+
+		var sprite := _find_animated_sprite(piece)
+
+		if sprite == null:
+			piece.free()
+			status_label.text = "ARTWORK ERROR / SPRITE NOT FOUND"
+			return
+
 		sprite.animation = spec["anim"]
 		sprite.stop()
-		sprite.modulate = Color(0.8, 0.9, 1.0, rng.randf_range(0.22, 0.48))
-		piece_layer.add_child(sprite)
 
+		# Keep pieces subtle in the background.
+		piece.modulate = Color(
+			0.8,
+			0.9,
+			1.0,
+			rng.randf_range(0.22, 0.48)
+		)
+
+		piece_layer.add_child(piece)
+
+		pieces.append(piece)
+
+		# Assign a randomized grid position.
 		var cell := cells[i]
-		pieces.append(sprite)
+		var row := floori(float(cell) / float(COLUMNS))
 
 		origins.append(Vector2(
-			(float(cell % columns) + rng.randf_range(0.15, 0.85)) / float(columns),
-			(float(cell / columns) + rng.randf_range(0.15, 0.85)) / float(rows)
+			(float(cell % COLUMNS) + rng.randf_range(0.15, 0.85))
+				/ float(COLUMNS),
+
+			(float(row) + rng.randf_range(0.15, 0.85))
+				/ float(rows)
 		))
 
 		phases.append(rng.randf_range(0.0, TAU))
@@ -151,14 +231,8 @@ func _create_pieces() -> void:
 
 	_update_pieces()
 
-func _find_animated_sprite(node: Node) -> AnimatedSprite2D:
-	if node is AnimatedSprite2D:
-		return node
-	for child in node.get_children():
-		var found := _find_animated_sprite(child)
-		if found != null:
-			return found
-	return null
+	status_label.text = ""
+
 
 func _process(delta: float) -> void:
 	if not reduced_motion:
@@ -167,11 +241,13 @@ func _process(delta: float) -> void:
 	_update_pieces()
 
 
+# Update positions and floating animations.
 func _update_pieces() -> void:
 	var view_size := size
 
 	for i in range(pieces.size()):
 		var phase := phases[i]
+
 		var drift := Vector2.ZERO
 		var angle := 0.0
 
@@ -183,7 +259,11 @@ func _update_pieces() -> void:
 
 			angle = sin(elapsed * 0.18 + phase) * 0.16
 
-		pieces[i].position = origins[i] * view_size + drift
+		# Convert Control coordinates into PieceLayer coordinates.
+		var control_position := origins[i] * view_size + drift
+		var global_position := get_global_transform() * control_position
+
+		pieces[i].position = piece_layer.to_local(global_position)
 		pieces[i].rotation = angle
 		pieces[i].scale = Vector2.ONE * scales[i]
 
@@ -210,4 +290,3 @@ func _open_setup() -> void:
 
 func _quit_game() -> void:
 	get_tree().quit()
-# ERROR: They are being spawned in, but not moving and being positioned. 

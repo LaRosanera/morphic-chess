@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 NetworkManager="*uid://c20sk08ph4bgi"
 GlobalAudio="*uid://bjlx8fmf6jbtj"
+Transition="*uid://docbhju6h7fsx"
 
 [display]
 

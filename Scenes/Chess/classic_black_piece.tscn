@@ -5,51 +5,51 @@
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tbg2i"]
 atlas = ExtResource("1_t7322")
-region = Rect2(55, 55, 45, 45)
+region = Rect2(220, 220, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_eock1"]
 atlas = ExtResource("1_opad5")
-region = Rect2(90, 45, 45, 45)
+region = Rect2(360, 180, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_gpf22"]
 atlas = ExtResource("1_opad5")
-region = Rect2(135, 45, 45, 45)
+region = Rect2(540, 180, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jp2s2"]
 atlas = ExtResource("1_t7322")
-region = Rect2(10, 55, 45, 45)
+region = Rect2(40, 220, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jyuoy"]
 atlas = ExtResource("1_t7322")
-region = Rect2(143, 55, 45, 45)
+region = Rect2(572, 220, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_q8wna"]
 atlas = ExtResource("1_opad5")
-region = Rect2(0, 45, 45, 45)
+region = Rect2(0, 180, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_mg7ad"]
 atlas = ExtResource("1_opad5")
-region = Rect2(0, 45, 45, 45)
+region = Rect2(0, 180, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_yl7yc"]
 atlas = ExtResource("1_opad5")
-region = Rect2(45, 45, 45, 45)
+region = Rect2(180, 180, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_opad5"]
 atlas = ExtResource("1_opad5")
-region = Rect2(225, 45, 45, 45)
+region = Rect2(900, 180, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_y1p4n"]
 atlas = ExtResource("1_t7322")
-region = Rect2(100, 55, 45, 45)
+region = Rect2(400, 220, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ygdck"]
 atlas = ExtResource("1_opad5")
-region = Rect2(45, 45, 45, 45)
+region = Rect2(180, 180, 180, 180)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_uvpcq"]
 atlas = ExtResource("1_opad5")
-region = Rect2(180, 45, 45, 45)
+region = Rect2(720, 180, 180, 180)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_bhunq"]
 animations = [{
@@ -159,6 +159,7 @@ animations = [{
 }]
 
 [node name="classic_black_piece" type="AnimatedSprite2D" unique_id=1731590654]
+scale = Vector2(0.25, 0.25)
 texture_filter = 2
 sprite_frames = SubResource("SpriteFrames_bhunq")
 animation = &"black_queen"

@@ -16,6 +16,9 @@ const TIME_OPTIONS := [
 
 enum Role { HOST, JOIN }
 
+# --- Audio ---
+@onready var button_audio: AudioStreamPlayer2D = $ButtonAudio
+
 # --- local fields ---
 @onready var white_field: Control = $Center/Panel/Margin/Content/Fields/WhiteField
 @onready var black_field: Control = $Center/Panel/Margin/Content/Fields/BlackField
@@ -63,6 +66,7 @@ func _ready() -> void:
 	_build_options()
 	_apply_styles()
 	_connect_signals()
+	_connect_button_sounds(self)
 	_restore_settings()
 	_restore_online_prefs()
 	_update_seed()
@@ -422,13 +426,7 @@ func _load_game(config: Dictionary) -> void:
 	get_tree().set_meta("chess_config", config)
 	get_tree().set_meta("game_seed", config.seed)
 
-	_set_transitioning(true)
-
-	var error := get_tree().change_scene_to_file(GAME_SCENE)
-
-	if error != OK:
-		_set_transitioning(false)
-		status_label.text = "COULD NOT LOAD THE GAME SCENE"
+	_change_scene_with_transition(GAME_SCENE, "COULD NOT LOAD THE GAME SCENE")
 
 
 func _go_back() -> void:
@@ -445,25 +443,55 @@ func _go_back() -> void:
 	get_tree().set_meta("chess_config", _get_configuration())
 	_save_online_prefs()
 
+	_change_scene_with_transition(TITLE_SCENE, "COULD NOT RETURN TO TITLE SCREEN")
+func _play_click() -> void:
+	if button_audio.stream != null:
+		button_audio.play()
+
+
+# Hooks up the click sound to every button in the scene, however deeply nested.
+func _connect_button_sounds(node: Node) -> void:
+	if node is BaseButton:
+		node.pressed.connect(_play_click)
+
+	# Dropdowns also click when you pick an item.
+	if node is OptionButton:
+		node.item_selected.connect(func(_i: int) -> void: _play_click())
+
+	for child in node.get_children():
+		_connect_button_sounds(child)
+		
+
+# Locks the UI, fades to black, then swaps scenes behind the black screen.
+func _change_scene_with_transition(path: String, error_text: String) -> void:
+	if transitioning:
+		return
+
 	_set_transitioning(true)
 
-	var error := get_tree().change_scene_to_file(TITLE_SCENE)
+	# Don't await fade() itself, since it also waits on the audio-fade loop.
+	# The signal fires when fade_to_black ends.
+	Transition.fade()
+	await Transition.on_transition_finished
+
+	var error := get_tree().change_scene_to_file(path)
 
 	if error != OK:
 		_set_transitioning(false)
-		status_label.text = "COULD NOT RETURN TO TITLE SCREEN"
+		status_label.text = error_text
 
 
 func _set_transitioning(value: bool) -> void:
 	transitioning = value
-	start_button.disabled = value
+	start_button.disabled = value or waiting
 	back_button.disabled = value
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
-		get_viewport().set_input_as_handled()
-		_go_back()
+			get_viewport().set_input_as_handled()
+			_play_click()
+			_go_back()
 
 
 # --------------------------------------------------
@@ -522,7 +550,9 @@ func _on_match_ready(config: Dictionary) -> void:
 
 	_load_game(config)
 
-
 func _on_connection_failed(reason: String) -> void:
+	if transitioning:
+		return
+
 	_set_waiting(false)
 	status_label.text = reason

@@ -7,7 +7,7 @@ const BLACK_PIECE_SCENE := "res://Scenes/Chess/classic_black_piece.tscn"
 
 const COPIES_PER_PIECE := 3
 const COLUMNS := 9
-const EXPECTED_ANIMATIONS := 12
+const EXPECTED_ANIMATIONS := 13
 
 @export var motion_speed: float = 0.65
 
@@ -18,6 +18,7 @@ const EXPECTED_ANIMATIONS := 12
 @onready var status_label: Label = $MenuCanvas/Panel/Margin/Content/StatusLabel
 @onready var panel: PanelContainer = $MenuCanvas/Panel
 @onready var seed_label: Label = $MenuCanvas/Panel/Margin/Content/SeedLabel
+@onready var button_audio: AudioStreamPlayer2D = $ButtonAudio
 
 var elapsed := 0.0
 var reduced_motion := false
@@ -60,9 +61,11 @@ func _ready() -> void:
 	motion_button.toggled.connect(_set_reduced_motion)
 	quit_button.pressed.connect(_quit_game)
 
-	_create_pieces()
+	
 
 	play_button.grab_focus()
+	
+	_create_pieces()
 
 
 func _apply_styles() -> void:
@@ -128,8 +131,9 @@ func _find_animated_sprite(node: Node) -> AnimatedSprite2D:
 
 # Create 3 copies of every animation for both piece sets.
 func _create_pieces() -> void:
+	
 	var packed_scenes: Array[PackedScene] = []
-
+	
 	# Load both piece scenes.
 	for path in [WHITE_PIECE_SCENE, BLACK_PIECE_SCENE]:
 		var packed := load(path) as PackedScene
@@ -139,10 +143,9 @@ func _create_pieces() -> void:
 			return
 
 		packed_scenes.append(packed)
-
+	
 	# Collect all animation names from both scenes.
 	var specs: Array[Dictionary] = []
-
 	for scene_index in range(packed_scenes.size()):
 		var probe := packed_scenes[scene_index].instantiate()
 		var animated_sprite := _find_animated_sprite(probe)
@@ -150,13 +153,14 @@ func _create_pieces() -> void:
 		if animated_sprite == null:
 			probe.free()
 			return
-
+		
 		var names := animated_sprite.sprite_frames.get_animation_names()
 
 		if names.size() != EXPECTED_ANIMATIONS:
 			probe.free()
+			print("Scene %d has %d animations: %s" % [scene_index, names.size(), names])
 			return
-
+		
 		for anim_name in names:
 			for copy in range(COPIES_PER_PIECE):
 				specs.append({
@@ -165,7 +169,6 @@ func _create_pieces() -> void:
 				})
 
 		probe.free()
-
 	var total := specs.size()
 	var rows := int(ceil(float(total) / float(COLUMNS)))
 
@@ -181,7 +184,7 @@ func _create_pieces() -> void:
 		var temp := cells[i]
 		cells[i] = cells[other]
 		cells[other] = temp
-
+	
 	# Spawn all pieces.
 	for i in range(total):
 		var spec: Dictionary = specs[i]
@@ -209,7 +212,7 @@ func _create_pieces() -> void:
 			1.0,
 			rng.randf_range(0.22, 0.48)
 		)
-
+		
 		piece_layer.add_child(piece)
 
 		pieces.append(piece)
@@ -231,7 +234,7 @@ func _create_pieces() -> void:
 
 	_update_pieces()
 
-	status_label.text = ""
+
 
 
 func _process(delta: float) -> void:
@@ -273,20 +276,45 @@ func _set_reduced_motion(enabled: bool) -> void:
 	get_tree().set_meta("reduced_motion", enabled)
 
 
-func _open_setup() -> void:
+func _play_click() -> void:
+	if button_audio.stream != null:
+		button_audio.play()
+
+
+# Plays the click, starts the fade, and runs `action` once the screen is black.
+func _transition_then(action: Callable) -> void:
 	if transitioning:
 		return
 
 	transitioning = true
 	play_button.disabled = true
+	quit_button.disabled = true
+	motion_button.disabled = true
 
+	_play_click()
+
+	# Don't await fade(): it also waits on the audio-fade loop.
+	# Wait for the signal instead, which fires when fade_to_black ends.
+	Transition.fade()
+	await Transition.on_transition_finished
+
+	action.call()
+
+
+func _open_setup() -> void:
+	_transition_then(_change_to_setup)
+
+
+func _change_to_setup() -> void:
 	var error := get_tree().change_scene_to_file(SETUP_SCENE)
 
 	if error != OK:
 		transitioning = false
 		play_button.disabled = false
+		quit_button.disabled = false
+		motion_button.disabled = false
 		status_label.text = "Could not open game setup. Check the scene path."
 
 
 func _quit_game() -> void:
-	get_tree().quit()
+	_transition_then(get_tree().quit)

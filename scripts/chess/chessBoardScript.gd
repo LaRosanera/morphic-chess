@@ -25,12 +25,14 @@ const PIECE_PITCHES := {
 	"man": 5,        # B4
 	"minister": 6    # C5
 }
-const SETTINGS_SCENE = preload("res://Scenes/Main/settings.tscn")
 const SETUP_SCENE := "res://Scenes/Main/game_setup.tscn"
 const DEFAULT_PRESET := "res://assets/board/board_layouts/everything.json"
 ## Static so it survives restart() reloading the scene.
 static var preset_path := DEFAULT_PRESET
 
+const DESIGN_SIZE := Vector2(768, 552)
+
+@onready var background_rect: ColorRect = $background/ColorRect
 @onready var tiles: TileMapLayer = $TileMapLayer
 @onready var pieces: Node2D = $Pieces
 @onready var highlights: Node2D = $Highlights
@@ -123,6 +125,8 @@ func _set_piece_sprite(piece: AnimatedSprite2D, color: String, piece_type: Strin
 
 
 func _ready() -> void:
+	get_viewport().size_changed.connect(_fit_to_viewport)
+	_fit_to_viewport()
 	_config = GameConfig.from_tree(get_tree())
 	_online = _config.online
 	local_color = _config.local_color
@@ -184,7 +188,17 @@ func _ready() -> void:
 	if _pending_name != "":
 		_log("Preset: %s\n" % _pending_name, GameLog.GOLD)
 
+# Centers the board/UI in the window and stretches the backdrop to fill it.
+func _fit_to_viewport() -> void:
+	var view := get_viewport_rect().size
+	var offset := ((view - DESIGN_SIZE) / 2.0).max(Vector2.ZERO).floor()
 
+	position = offset
+
+	# The backdrop is a child of this node, so counter the shift and
+	# cover the whole window.
+	background_rect.position = -offset
+	background_rect.size = view
 # --------------------------------------------------
 # INPUT / SELECTION
 # --------------------------------------------------
@@ -450,6 +464,4 @@ func open_preset_picker() -> void:
 
 
 func _on_settings_pressed() -> void:
-	var settings = SETTINGS_SCENE.instantiate()
-	get_tree().root.add_child(settings)
-	settings.call("setup", self)
+	Settings.open(self)

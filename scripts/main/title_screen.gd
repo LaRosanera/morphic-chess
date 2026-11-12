@@ -4,6 +4,7 @@ extends Control
 const SETUP_SCENE := "res://scenes/main/game_setup.tscn"
 const WHITE_PIECE_SCENE := "res://Scenes/Chess/classic_white_piece.tscn"
 const BLACK_PIECE_SCENE := "res://Scenes/Chess/classic_black_piece.tscn"
+const SETTINGS_SCENE = preload("res://Scenes/Main/settings.tscn")
 
 const COPIES_PER_PIECE := 3
 const COLUMNS := 9
@@ -318,3 +319,9 @@ func _change_to_setup() -> void:
 
 func _quit_game() -> void:
 	_transition_then(get_tree().quit)
+
+
+func _on_settings_pressed() -> void:
+	var settings = SETTINGS_SCENE.instantiate()
+	get_tree().root.add_child(settings)
+	Settings.open()

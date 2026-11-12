@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://8n476savhrbw" path="res://assets/icons/rose_vine.svg" id="2_4q7xn"]
 [ext_resource type="Texture2D" uid="uid://cfh1fipvix4cm" path="res://assets/icons/signature.svg" id="3_korwd"]
 [ext_resource type="AudioStream" uid="uid://wto21j0bt3y" path="res://assets/audio/buttonclick.mp3" id="4_5v8ji"]
+[ext_resource type="Texture2D" uid="uid://d017x0hfnqxvm" path="res://assets/icons/settings_icon.svg" id="4_x00po"]
 
 [node name="TitleScreen" type="Control" unique_id=661133958]
 layout_mode = 3
@@ -131,3 +132,15 @@ text = "QUIT"
 position = Vector2(385, 400)
 scale = Vector2(0.43, 0.5)
 texture = ExtResource("3_korwd")
+
+[node name="settings" type="Button" parent="MenuCanvas" unique_id=1618777753]
+layout_mode = 0
+offset_left = 529.0
+offset_top = 73.0
+offset_right = 582.0
+offset_bottom = 126.0
+icon = ExtResource("4_x00po")
+flat = true
+alignment = 0
+
+[connection signal="pressed" from="MenuCanvas/settings" to="." method="_on_settings_pressed"]

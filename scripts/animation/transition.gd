@@ -20,7 +20,7 @@ func fade():
 	while value > 0:
 		
 		AudioServer.set_bus_volume_db(0,linear_to_db(value))
-		await get_tree().create_timer(1).timeout
+		await get_tree().create_timer(0.5).timeout
 		value -= 0.5
 	
 

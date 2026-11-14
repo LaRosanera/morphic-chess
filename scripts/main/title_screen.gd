@@ -5,7 +5,7 @@ const SETUP_SCENE := "res://scenes/main/game_setup.tscn"
 const WHITE_PIECE_SCENE := "res://Scenes/Chess/classic_white_piece.tscn"
 const BLACK_PIECE_SCENE := "res://Scenes/Chess/classic_black_piece.tscn"
 const SETTINGS_SCENE = preload("res://Scenes/Main/settings.tscn")
-
+const DAILY_SEED_PATH = "res://data/daily_seed.json"
 const COPIES_PER_PIECE := 3
 const COLUMNS := 9
 const EXPECTED_ANIMATIONS := 13
@@ -47,10 +47,15 @@ func _ready() -> void:
 
 	# Use the date as the random number generator seed.
 	rng.seed = daily_seed
-
+	var seed_file = FileAccess.open(DAILY_SEED_PATH, FileAccess.WRITE)
+	if seed_file:
+		seed_file.store_string(str(daily_seed))
+		seed_file.close()
+	else:
+		print("ERROR. COULD NOT ACCESS SEED FILE")
 	# Make the seed accessible to other scenes.
 	get_tree().set_meta("daily_seed", daily_seed)
-
+	
 	seed_label.text = " DAILY SEED: %08d" % daily_seed
 
 	_apply_styles()

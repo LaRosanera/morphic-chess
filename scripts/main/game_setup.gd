@@ -2,7 +2,8 @@ extends Control
 
 const TITLE_SCENE := "res://Scenes/Main/title_screen.tscn"
 const GAME_SCENE := "res://Scenes/Chess/chess_board.tscn"
-const DAILY_SEED := 20261102
+var DAILY_SEED_PATH := "res://data/daily_seed.json"
+var DAILY_SEED = JSON.parse_string(FileAccess.get_file_as_string(DAILY_SEED_PATH))
 const DEFAULT_PORT := 7777
 
 const TIME_OPTIONS := [

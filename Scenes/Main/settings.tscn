@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://8n476savhrbw" path="res://assets/icons/rose_vine.svg" id="2_0rwlq"]
 [ext_resource type="AudioStream" uid="uid://wto21j0bt3y" path="res://assets/audio/buttonclick.mp3" id="3_v5lfv"]
 [ext_resource type="Texture2D" uid="uid://bgyt5v31v8skr" path="res://assets/icons/morphic_chess_polygon_texture.svg" id="4_polygon"]
-[ext_resource type="Theme" uid="uid://8yklbj61k4vr" path="res://assets/themes/settings_theme.tres" id="5_theme"]
+[ext_resource type="Theme" path="res://assets/themes/settings_theme.tres" id="5_theme"]
 
 [node name="SettingsMenu" type="Control" unique_id=2112605759]
 visible = false

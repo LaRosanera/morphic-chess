@@ -41,6 +41,8 @@ const DESIGN_SIZE := Vector2(768, 552)
 @onready var log_box: RichTextLabel = $UI/Terminal/Log
 @onready var piano_key_player: AudioStreamPlayer2D = $piano_key_player
 @onready var button_audio: AudioStreamPlayer2D = $ButtonAudio
+@onready var white_clock: Label = $UI/WhiteClock
+@onready var black_clock: Label = $UI/BlackClock
 
 var daily_changes: Array[String] = []
 
@@ -65,6 +67,14 @@ var selected: AnimatedSprite2D
 var moves: Dictionary = {}
 var pending_promo: Dictionary = {}
 var _pending_name := "Classic"
+
+
+var _clock: ChessClock
+var _clock_sync: ClockSync
+var _clock_labels := {}
+var _clock_synced := true
+var _sync_retry := 0.0
+var time_expired := false
 
 # Compatibility properties: existing scene scripts/settings can continue
 # reading the names exposed by the previous chessBoardScript.gd.
@@ -148,7 +158,7 @@ func _ready() -> void:
 
 	RuleSetup.register_custom($Rules)
 	_state.rules = RuleSetup.collect($Rules)
-	RuleSetup.apply_seeded(_state.rules, rng, _log_writer)
+	_state.castle_types = RuleSetup.apply_seeded(_state.rules, rng, _log_writer)
 
 	_spawner = PieceSpawner.new(
 		white_piece_scene,
@@ -171,6 +181,27 @@ func _ready() -> void:
 	_online_sync.move_approved.connect(_apply_move)
 	_online_sync.move_rejected.connect(_on_move_rejected)
 
+	_clock = ChessClock.new()
+	_clock.setup(_config.initial_time, _config.increment)
+	_clock.expired.connect(_on_clock_expired)
+	_build_clock_ui()
+
+	if _online:
+		_clock_sync = ClockSync.new()
+		_clock_sync.name = "ClockSync"
+		add_child(_clock_sync)
+		_clock_sync.setup(_clock)
+		_clock_sync.timed_out.connect(_on_clock_timed_out)
+		_clock_sync.synced.connect(func() -> void:
+			_clock_synced = true
+			_update_status()
+		)
+
+		if not multiplayer.is_server():
+			_clock_synced = false
+			_clock.enabled = false  # until the host tells us
+			_clock.running = false
+			_clock_sync.ask_host()
 	_log("MORPHIC CHESS v0.1")
 	_log("------------------")
 	_log("No check rules. Capture the enemy king to win.")
@@ -201,6 +232,85 @@ func _fit_to_viewport() -> void:
 	# cover the whole window.
 	background_rect.position = -offset
 	background_rect.size = view
+	
+#TIME
+func _process(delta: float) -> void:
+	_clock.tick(delta)
+	_update_clock_labels()
+
+	# Guest: keep asking until the host's board has loaded and answered.
+	if _online and not _clock_synced:
+		_sync_retry += delta
+		if _sync_retry >= 0.5:
+			_sync_retry = 0.0
+			_clock_sync.ask_host()
+
+
+func _build_clock_ui() -> void:
+	_clock_labels = {"white": white_clock, "black": black_clock}
+
+	# Keep the bottom player's clock on the left when the board is flipped.
+	if flipped:
+		var left_pos := white_clock.position
+		white_clock.position = black_clock.position
+		black_clock.position = left_pos
+
+
+func _update_clock_labels() -> void:
+	for color in _clock_labels:
+		var label: Label = _clock_labels[color]
+		label.visible = _clock.enabled
+		if not _clock.enabled:
+			continue
+
+		var t: float = _clock.remaining[color]
+		var is_active: bool = _clock.running and _clock.active == color
+		var tint := Color("9aa0a6")
+
+		if is_active:
+			tint = Color("ffd166")
+		if t < 10.0 and (is_active or t <= 0.0):
+			tint = Color("ff8a80")
+
+		label.text = "%s %s" % [String(color).left(1).to_upper(), ChessClock.format(t)]
+		label.add_theme_color_override("font_color", tint)
+
+
+func _on_clock_expired(color: String) -> void:
+	# Only the host (or an offline game) decides timeouts.
+	if _online and not multiplayer.is_server():
+		return
+
+	if _online:
+		_clock_sync.broadcast()
+		_clock_sync.send_timeout(color)
+
+	_end_on_time(color)
+
+
+func _on_clock_timed_out(color: String) -> void:
+	_clock.remaining[color] = 0.0
+	_end_on_time(color)
+
+
+func _end_on_time(color: String) -> void:
+	if over or disconnected or time_expired:
+		return
+
+	time_expired = true
+	_state.over = true
+	awaiting_result = false
+	pending_promo.clear()
+	_promotion_ui.hide()
+	_deselect()
+	_clock.stop()
+
+	_log(
+		"\n%s ran out of time. Both players lose." % _config.name_of(color),
+		GameLog.RED
+	)
+	_update_status()
+	
 # --------------------------------------------------
 # INPUT / SELECTION
 # --------------------------------------------------
@@ -337,7 +447,11 @@ func _apply_move(from: Vector2i, to: Vector2i, promo: String) -> void:
 	_view.slide(piece, to)
 
 	_log_move(piece, from, to, victim_type)
-
+	if not _state.last_castle.is_empty():
+		var castle_to: Vector2i = _state.last_castle["rook_to"]
+		var castled_rook: AnimatedSprite2D = grid[castle_to]
+		_view.slide(castled_rook, castle_to)
+		_log("   castled with %s" % MoveRule.type_of(castled_rook), _turn_color())
 	if promo != "":
 		var previous_type := MoveRule.type_of(piece)
 		PieceSpawner.set_sprite(piece, turn, promo)
@@ -348,6 +462,17 @@ func _apply_move(from: Vector2i, to: Vector2i, promo: String) -> void:
 
 	_deselect()
 	_state.end_turn()
+
+	if over:
+		_clock.stop()
+	elif not (_online and not multiplayer.is_server()):
+		_clock.switch_to(turn)
+	else:
+		_clock.switch_to(turn)
+
+	if _online and multiplayer.is_server():
+		_clock_sync.broadcast()
+
 	_update_status()
 
 func _on_move_rejected() -> void:
@@ -363,14 +488,14 @@ func _on_move_rejected() -> void:
 func _on_opponent_left() -> void:
 	if disconnected or over:
 		return
-
+	
 	disconnected = true
 	_state.over = true
 	awaiting_result = false
 	pending_promo.clear()
 	_promotion_ui.hide()
 	_deselect()
-
+	_clock.stop()
 	_log("\nOpponent disconnected.", GameLog.RED)
 	NetworkManager.shutdown()
 	_update_status()
@@ -424,7 +549,9 @@ func _update_status() -> void:
 	if disconnected:
 		status.text = "Opponent disconnected"
 		return
-
+	if time_expired:
+		status.text = "Time out - both lose"
+		return
 	if over:
 		status.text = "%s wins!" % _current_player_name()
 		return
@@ -435,7 +562,10 @@ func _update_status() -> void:
 	]
 
 	if _online:
-		status_text += "  -  YOUR MOVE" if turn == local_color else "  -  waiting..."
+		if _clock.enabled:
+			status_text = "%s (%s)" % ["Your move" if turn == local_color else "Waiting...", turn.capitalize()]
+		else:
+			status_text += "  -  YOUR MOVE" if turn == local_color else "  -  waiting..."
 
 	status.text = status_text
 

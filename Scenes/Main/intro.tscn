@@ -1,0 +1,184 @@
+[gd_scene format=3 uid="uid://dunvy66epjryj"]
+
+[ext_resource type="Texture2D" uid="uid://cfh1fipvix4cm" path="res://assets/icons/signature.svg" id="1_8s5q0"]
+[ext_resource type="Script" uid="uid://dvdk5vj1ect7y" path="res://scripts/main/intro.gd" id="1_souyd"]
+[ext_resource type="Texture2D" uid="uid://8n476savhrbw" path="res://assets/icons/rose_vine.svg" id="2_souyd"]
+[ext_resource type="AudioStream" uid="uid://dkbkm3sdafwob" path="res://assets/audio/f#.wav" id="4_ncko7"]
+
+[sub_resource type="Animation" id="Animation_intro"]
+resource_name = "intro"
+length = 3.2
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Decorations:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.8, 2.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0.3), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Signature:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.7, 2.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = false
+tracks/2/path = NodePath("Signature:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.8, 2.5, 3.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0.94, 0.94), Vector2(0.94, 0.94), Vector2(1, 1), Vector2(1.015, 1.015)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = false
+tracks/3/path = NodePath("Signature:offset_top")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.8, 2.5, 3.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [-92.0, -92.0, -100.0, -102.0]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = false
+tracks/4/path = NodePath("Signature:offset_bottom")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.8, 2.5, 3.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [108.0, 108.0, 100.0, 98.0]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = false
+tracks/5/path = NodePath("Decorations/left:rotation")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 1.2, 2.5, 3.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [3.1415927, 3.12, 3.1415927, 3.15]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Decorations/right:rotation")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 1.2, 2.5, 3.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [0.0, 0.02, 0.0, -0.015]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_intro"]
+_data = {
+&"intro": SubResource("Animation_intro")
+}
+
+[node name="Intro" type="Control" unique_id=93008483]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_souyd")
+
+[node name="Background" type="ColorRect" parent="." unique_id=1660171475]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.018, 0.018, 0.025, 1)
+
+[node name="Signature" type="TextureRect" parent="." unique_id=373675178]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -92.0
+offset_right = 160.0
+offset_bottom = 108.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(160, 100)
+scale = Vector2(0.94, 0.94)
+mouse_filter = 2
+texture = ExtResource("1_8s5q0")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Decorations" type="Control" parent="." unique_id=304459870]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+[node name="left" type="TextureRect" parent="Decorations" unique_id=249663736]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -305.0
+offset_right = 180.0
+grow_vertical = 0
+pivot_offset = Vector2(90, 152.5)
+rotation = 3.1415927
+mouse_filter = 2
+texture = ExtResource("2_souyd")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="right" type="TextureRect" parent="Decorations" unique_id=264890909]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -180.0
+offset_bottom = 305.0
+grow_horizontal = 0
+pivot_offset = Vector2(180, 0)
+mouse_filter = 2
+texture = ExtResource("2_souyd")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=922856285]
+libraries/ = SubResource("AnimationLibrary_intro")
+autoplay = &"intro"
+
+[node name="F#" type="AudioStreamPlayer" parent="." unique_id=675044995]
+stream = ExtResource("4_ncko7")

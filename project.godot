@@ -11,8 +11,9 @@ config_version=5
 [application]
 
 config/name="Morphic Chess"
-config/version="0.19"
-run/main_scene="uid://sopqo7erh32j"
+config/description="Morphic Chess is a chess variant where each game’s rules are reshaped by a seed: piece ranges, jumping abilities, pawn moves, and even who can castle change from game to game. It features custom fairy pieces like the Amazon, Empress, and Camel, with no check rules, so the goal is simply to capture the enemy king, playable locally or online with optional chess clocks."
+config/version="0.20"
+run/main_scene="uid://dunvy66epjryj"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="uid://vwy80uh4cfse"
 

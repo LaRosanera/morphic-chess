@@ -58,7 +58,7 @@ func _approve(from: Vector2i, to: Vector2i, promo: String) -> void:
 	move_approved.emit(from, to, promo)
 
 
-## Host -> the guest whose request was refused.
+## Host -> the guest whose request was refused.a
 @rpc("authority", "reliable")
 func _reject() -> void:
 	move_rejected.emit()

@@ -172,10 +172,30 @@ theme = ExtResource("10_theme")
 layout_mode = 0
 offset_left = 8.0
 offset_top = 516.0
-offset_right = 408.0
+offset_right = 213.0
 offset_bottom = 548.0
 theme_override_font_sizes/font_size = 20
 text = "White to move"
+
+[node name="WhiteClock" type="Label" parent="UI" unique_id=1772015296]
+layout_mode = 0
+offset_left = 215.0
+offset_top = 516.0
+offset_right = 295.0
+offset_bottom = 548.0
+theme_override_font_sizes/font_size = 20
+text = "W 0:00"
+vertical_alignment = 1
+
+[node name="BlackClock" type="Label" parent="UI" unique_id=597605253]
+layout_mode = 0
+offset_left = 297.0
+offset_top = 516.0
+offset_right = 377.0
+offset_bottom = 548.0
+theme_override_font_sizes/font_size = 20
+text = "B 0:00"
+vertical_alignment = 1
 
 [node name="Terminal" type="ColorRect" parent="UI" unique_id=2127625043]
 layout_mode = 0

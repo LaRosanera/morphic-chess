@@ -2,6 +2,7 @@ extends Control
 
 const TITLE_SCENE := "res://Scenes/Main/title_screen.tscn"
 const GAME_SCENE := "res://Scenes/Chess/chess_board.tscn"
+const NAME_MAX_LENGTH := 7
 var DAILY_SEED_PATH := "res://data/daily_seed.json"
 var DAILY_SEED = JSON.parse_string(FileAccess.get_file_as_string(DAILY_SEED_PATH))
 const DEFAULT_PORT := 7777
@@ -14,6 +15,7 @@ const TIME_OPTIONS := [
 	{"label": "Rapid — 10 + 0", "seconds": 600, "increment": 0},
 	{"label": "Rapid — 15 + 10", "seconds": 900, "increment": 10}
 ]
+
 
 enum Role { HOST, JOIN }
 
@@ -64,6 +66,8 @@ var waiting := false  # hosting/joining in progress, waiting on the network
 
 
 func _ready() -> void:
+	for field in [white_name, black_name, online_name]:
+		field.max_length = NAME_MAX_LENGTH
 	_build_options()
 	_connect_signals()
 	_connect_button_sounds(self)
@@ -152,11 +156,12 @@ func _refresh_layout() -> void:
 	online_fields.columns = 3
 	fields_grid.columns = 3
 
-	# Let the cells share the width evenly while online.
-	var flag := Control.SIZE_EXPAND_FILL if online else Control.SIZE_FILL
+	# Every cell gets the same minimum width and expands equally, online or local.
 	for grid in [online_fields, fields_grid]:
 		for child in grid.get_children():
-			(child as Control).size_flags_horizontal = flag
+			var cell := child as Control
+			cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			cell.custom_minimum_size.x = 200
 	if not online:
 		subtitle.text = "LOCAL TWO-PLAYER / STANDARD STARTING POSITION"
 		start_button.text = "START GAME  >"

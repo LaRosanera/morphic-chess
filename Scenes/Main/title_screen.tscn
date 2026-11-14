@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cfh1fipvix4cm" path="res://assets/icons/signature.svg" id="3_korwd"]
 [ext_resource type="AudioStream" uid="uid://wto21j0bt3y" path="res://assets/audio/buttonclick.mp3" id="4_5v8ji"]
 [ext_resource type="Texture2D" uid="uid://d017x0hfnqxvm" path="res://assets/icons/settings_icon.svg" id="4_x00po"]
-[ext_resource type="Theme" uid="uid://8yklbj61k4vr" path="res://assets/themes/settings_theme.tres" id="5_theme"]
+[ext_resource type="Theme" uid="uid://bjpdwykllqede" path="res://assets/themes/settings_theme.tres" id="5_theme"]
 [ext_resource type="FontFile" uid="uid://drf238hk4vjyk" path="res://assets/fonts/Deutsch.ttf" id="6_rhy4w"]
 [ext_resource type="FontFile" uid="uid://oaxbql5vvjmd" path="res://assets/fonts/GODOFWAR.TTF" id="7_lxw6n"]
 
@@ -146,7 +146,7 @@ text = "QUIT"
 
 [node name="Signature" type="Sprite2D" parent="MenuCanvas" unique_id=916819228]
 position = Vector2(385, 400)
-scale = Vector2(0.43, 0.5)
+scale = Vector2(0.2, 0.2)
 texture = ExtResource("3_korwd")
 
 [node name="settings" type="Button" parent="MenuCanvas" unique_id=1618777753]

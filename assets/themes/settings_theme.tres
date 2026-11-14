@@ -1,9 +1,12 @@
-[gd_resource type="Theme" format=3 uid="uid://8yklbj61k4vr"]
+[gd_resource type="Theme" format=3 uid="uid://bjpdwykllqede"]
 
 [ext_resource type="FontFile" uid="uid://bq6hb5xg058me" path="res://assets/fonts/CormorantSemiboldItalic-E4AYz.ttf" id="1_font"]
 [ext_resource type="Texture2D" uid="uid://d01u08xpau5k8" path="res://assets/icons/bar_assets/slider_grabber.svg" id="2_grabber"]
 [ext_resource type="Texture2D" uid="uid://cw4n4medwsug6" path="res://assets/icons/bar_assets/slider_track.svg" id="3_track"]
 [ext_resource type="Texture2D" uid="uid://bg7jufplscpc8" path="res://assets/icons/bar_assets/slider_fill.svg" id="4_fill"]
+[ext_resource type="Texture2D" uid="uid://cb2ca0eka1phu" path="res://assets/icons/bar_assets/scrollbar_track.svg" id="5_scroll_track"]
+[ext_resource type="Texture2D" uid="uid://diuqych77hpc4" path="res://assets/icons/bar_assets/scrollbar_grabber.svg" id="6_scroll_grabber"]
+[ext_resource type="Texture2D" uid="uid://bnnel6brkb40c" path="res://assets/icons/bar_assets/scrollbar_grabber_hover.svg" id="7_scroll_grabber_hover"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
 content_margin_left = 12.0
@@ -81,6 +84,33 @@ texture_margin_top = 7.0
 texture_margin_right = 7.0
 texture_margin_bottom = 7.0
 
+[sub_resource type="StyleBoxTexture" id="ScrollBar_grabber"]
+texture = ExtResource("6_scroll_grabber")
+texture_margin_left = 7.0
+texture_margin_top = 7.0
+texture_margin_right = 7.0
+texture_margin_bottom = 7.0
+
+[sub_resource type="StyleBoxTexture" id="ScrollBar_grabber_hover"]
+texture = ExtResource("7_scroll_grabber_hover")
+texture_margin_left = 7.0
+texture_margin_top = 7.0
+texture_margin_right = 7.0
+texture_margin_bottom = 7.0
+
+[sub_resource type="StyleBoxTexture" id="ScrollBar_grabber_pressed"]
+texture_margin_left = 7.0
+texture_margin_top = 7.0
+texture_margin_right = 7.0
+texture_margin_bottom = 7.0
+
+[sub_resource type="StyleBoxTexture" id="ScrollBar_track"]
+texture = ExtResource("5_scroll_track")
+texture_margin_left = 7.0
+texture_margin_top = 7.0
+texture_margin_right = 7.0
+texture_margin_bottom = 7.0
+
 [resource]
 default_font = ExtResource("1_font")
 default_font_size = 17
@@ -106,3 +136,8 @@ HSlider/icons/grabber = ExtResource("2_grabber")
 HSlider/icons/grabber_highlight = ExtResource("2_grabber")
 HSlider/styles/grabber_area = SubResource("StyleBoxTexture_fill")
 HSlider/styles/slider = SubResource("StyleBoxTexture_track")
+ScrollBar/styles/grabber = SubResource("ScrollBar_grabber")
+ScrollBar/styles/grabber_highlight = SubResource("ScrollBar_grabber_hover")
+ScrollBar/styles/grabber_pressed = SubResource("ScrollBar_grabber_pressed")
+ScrollBar/styles/scroll = SubResource("ScrollBar_track")
+VScrollBar/constants/scroll_width = 16

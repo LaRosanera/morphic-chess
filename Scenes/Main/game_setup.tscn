@@ -1,4 +1,3 @@
-
 [gd_scene format=3 uid="uid://dgrck20d0hor6"]
 
 [ext_resource type="Script" uid="uid://cxbcqruvqkhev" path="res://scripts/main/game_setup.gd" id="1_pfm0t"]
@@ -6,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://cjfrjvuevputu" path="res://Scenes/Chess/classic_black_piece.tscn" id="3_2lmj7"]
 [ext_resource type="PackedScene" uid="uid://cg32l7wtisebm" path="res://Scenes/Chess/classic_white_piece.tscn" id="4_0to1n"]
 [ext_resource type="AudioStream" uid="uid://wto21j0bt3y" path="res://assets/audio/buttonclick.mp3" id="5_0to1n"]
-[ext_resource type="Theme" path="res://assets/themes/settings_theme.tres" id="6_theme"]
+[ext_resource type="Theme" uid="uid://bjpdwykllqede" path="res://assets/themes/settings_theme.tres" id="6_theme"]
 
 [node name="GameSetup" type="Control" unique_id=1063435747]
 layout_mode = 3

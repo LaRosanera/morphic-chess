@@ -14,6 +14,12 @@ const PROMO_ORDER := [
 var grid := {}  # Vector2i -> piece node
 var rules := {}  # piece type -> MoveRule node
 
+## Piece types allowed to castle with the king. Empty = castling disabled.
+var castle_types := {}
+
+## Set by move_piece(): {"rook_from", "rook_to"} if the last move was a castle.
+var last_castle := {}
+
 ## Piece types spawned in this game, recorded separately per color.
 ## Capturing a piece does not remove its type from promotion options.
 var game_types := {
@@ -33,12 +39,19 @@ func in_bounds(cell: Vector2i) -> bool:
 	)
 
 
-## Target cells for a piece (ordinary move/capture rules only).
+## Target cells for a piece (ordinary move/capture rules, plus castling).
 func targets(p: AnimatedSprite2D, from: Vector2i) -> Array[Vector2i]:
 	var rule: MoveRule = rules[MoveRule.type_of(p)]
 	var has_moved: bool = p.get_meta("moved", false)
+	var out := rule.get_targets(grid, from, MoveRule.color_of(p), has_moved)
 
-	return rule.get_targets(grid, from, MoveRule.color_of(p), has_moved)
+	if MoveRule.type_of(p) == "king":
+		for dir in [-1, 1]:
+			var to := Vector2i(from.x + 2 * dir, from.y)
+			if in_bounds(to) and not out.has(to) and not castle_for(from, to).is_empty():
+				out.append(to)
+
+	return out
 
 
 ## True if moving this piece to `to` triggers a promotion.
@@ -120,13 +133,14 @@ func check_move(
 	return {"ok": true, "promo": final_promo}
 
 
-## Moves a piece in the grid, removes any captured piece, and returns the
-## captured type ("" if none). Capturing a king ends the game.
+
 func move_piece(from: Vector2i, to: Vector2i) -> String:
+	var castle := castle_for(from, to)  # must be read before the grid changes
 	var p: AnimatedSprite2D = grid[from]
 	var victim = grid.get(to)
 	var victim_type := ""
 
+	last_castle = {}
 	grid.erase(from)
 
 	if victim != null:
@@ -137,8 +151,51 @@ func move_piece(from: Vector2i, to: Vector2i) -> String:
 	grid[to] = p
 	p.set_meta("moved", true)
 
-	return victim_type
+	if not castle.is_empty():
+		var r = grid[castle["rook_from"]]
+		grid.erase(castle["rook_from"])
+		grid[castle["rook_to"]] = r
+		r.set_meta("moved", true)
+		last_castle = castle
 
+	return victim_type
+## If moving the king from -> to is a castle, returns
+## {"rook_from": cell, "rook_to": cell}. Otherwise returns {}.
+## The king steps two cells toward the nearest piece on its rank. That piece
+## must be a friendly, unmoved castler at least 3 cells away, and the king
+## must be unmoved too. No check rules, so attacked cells don't matter.
+func castle_for(from: Vector2i, to: Vector2i) -> Dictionary:
+	var king = grid.get(from)
+
+	if king == null or castle_types.is_empty():
+		return {}
+	if MoveRule.type_of(king) != "king" or king.get_meta("moved", false):
+		return {}
+	if to.y != from.y or absi(to.x - from.x) != 2:
+		return {}
+
+	var dir := signi(to.x - from.x)
+	var color := MoveRule.color_of(king)
+	var x := from.x + dir
+
+	while x >= 0 and x < MoveRule.SIZE:
+		var cell := Vector2i(x, from.y)
+		var other = grid.get(cell)
+
+		if other != null:
+			var ok: bool = (
+				absi(x - from.x) >= 3
+				and MoveRule.color_of(other) == color
+				and castle_types.has(MoveRule.type_of(other))
+				and not other.get_meta("moved", false)
+			)
+			if ok:
+				return {"rook_from": cell, "rook_to": Vector2i(from.x + dir, from.y)}
+			return {}
+
+		x += dir
+
+	return {}
 
 func end_turn() -> void:
 	if not over:

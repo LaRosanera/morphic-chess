@@ -2,8 +2,10 @@
 extends Control
 
 const MAIN_MENU_PATH := "res://Scenes/Main/title_screen.tscn"
+const SETTINGS_PATH := "res://data/settings.json"
 
 var chess_board: Node2D
+var _windowed_size := Vector2i(768, 552)
 
 const WHITE_PIECE_SCENE: PackedScene = preload("res://Scenes/Chess/classic_white_piece.tscn")
 @onready var master_slider: HSlider = $Center/Panel/Margin/Main/Tabs/Audio/MasterSlider
@@ -38,6 +40,7 @@ func _ready() -> void:
 	z_index = 100
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	tabs.tab_changed.connect(_on_tab_changed)
+	load_settings()      # <- new
 	_setup_audio()
 	_setup_display()
 ## USED DURING THE GAME
@@ -74,6 +77,80 @@ func _refresh_game_info() -> void:
 	game_info.text = "\n".join(lines)
 	_build_rules_list()
 	
+	
+
+
+func load_settings() -> void:
+	if not FileAccess.file_exists(SETTINGS_PATH):
+		return
+
+	var data = JSON.parse_string(FileAccess.get_file_as_string(SETTINGS_PATH))
+	if not (data is Dictionary):
+		return
+
+	var audio: Dictionary = data.get("audio", {})
+	for bus_name in ["Master", "Music", "SFX"]:
+		var index := AudioServer.get_bus_index(bus_name)
+		if index != -1 and audio.has(bus_name.to_lower()):
+			AudioServer.set_bus_volume_linear(
+				index, clampf(float(audio[bus_name.to_lower()]), 0.0, 1.0)
+			)
+
+	var display: Dictionary = data.get("display", {})
+	var size := Vector2i(
+		int(display.get("width", _windowed_size.x)),
+		int(display.get("height", _windowed_size.y))
+	)
+	var screen := DisplayServer.window_get_current_screen()
+	var screen_size := DisplayServer.screen_get_size(screen)
+
+	if size.x <= screen_size.x and size.y <= screen_size.y:
+		_windowed_size = size
+
+	if bool(display.get("fullscreen", false)):
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+		DisplayServer.window_set_size(_windowed_size)
+		DisplayServer.window_set_position(
+			DisplayServer.screen_get_position(screen)
+			+ (screen_size - _windowed_size) / 2
+		)
+
+
+func save_settings() -> void:
+	var fullscreen := _is_fullscreen()
+
+	# While fullscreen the window size is the monitor size, so keep the last
+	# windowed size instead.
+	if not fullscreen:
+		_windowed_size = DisplayServer.window_get_size()
+
+	var data := {
+		"version": 1,
+		"audio": {
+			"master": _bus_linear("Master"),
+			"music": _bus_linear("Music"),
+			"sfx": _bus_linear("SFX"),
+		},
+		"display": {
+			"fullscreen": fullscreen,
+			"width": _windowed_size.x,
+			"height": _windowed_size.y,
+		},
+	}
+
+	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
+	if file == null:
+		push_warning("Could not save settings: %s" % error_string(FileAccess.get_open_error()))
+		return
+
+	file.store_string(JSON.stringify(data, "\t"))
+
+
+func _bus_linear(bus_name: String) -> float:
+	var index := AudioServer.get_bus_index(bus_name)
+	return AudioServer.get_bus_volume_linear(index) if index != -1 else 1.0
 	
 ## USED OUTSDIE
 func _refresh_display_state() -> void:
@@ -190,7 +267,7 @@ func _build_rules_list() -> void:
 		info.scroll_active = false
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		info.text = "\n".join([
-			"[color=CADET_BLUE]%s[/color]" % piece_type.capitalize(),
+			"[color=MAGENTA]%s[/color]" % piece_type.capitalize(),
 			"Maximum range: %d" % rule.max_range,
 			"First move range: %d" % rule.first_move_range,
 			"Can jump: %s" % str(rule.jumps),
@@ -254,6 +331,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		close()
 
 func close() -> void:
+	save_settings()
 	visible = false
 	chess_board = null
 	

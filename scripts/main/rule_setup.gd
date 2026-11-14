@@ -112,7 +112,7 @@ static func apply_seeded(
 	rules: Dictionary,
 	rng: RandomNumberGenerator,
 	game_log: GameLog
-) -> void:
+) -> Dictionary:
 	# FEATURE 1: Randomize a standard sliding piece's range.
 	var sliding_pieces := ["rook", "bishop", "queen", "king", "elephant"]
 	var chosen_piece: String = sliding_pieces[
@@ -152,3 +152,53 @@ static func apply_seeded(
 			"%s can jump over pieces!" % jump_piece.capitalize(),
 			GameLog.GOLD
 		)
+		# FEATURE 4: a random piece can also step one square any direction.
+	var stepper_pool := ["knight", "bishop", "rook"]
+	var stepper: String = stepper_pool[rng.randi_range(0, stepper_pool.size() - 1)]
+	var step_roll := rng.randf()
+
+	if step_roll < 0.5 and rules.has(stepper):
+		var step_rule: MoveRule = rules[stepper]
+		step_rule.leap_directions.append_array(ORTHO)
+		step_rule.leap_directions.append_array(DIAG)
+		game_log.write(
+			"%s can also step one square any direction" % stepper.capitalize(),
+			GameLog.GOLD
+		)
+
+	# FEATURE 5: pawns can capture sideways.
+	var side_roll := rng.randf()
+
+	if side_roll < 0.4 and rules.has("pawn"):
+		var side_rule: MoveRule = rules["pawn"]
+		side_rule.capture_only_directions.append(Vector2i(1, 0))
+		side_rule.capture_only_directions.append(Vector2i(-1, 0))
+		game_log.write("Pawns can capture sideways", GameLog.GOLD)
+
+	# FEATURE 6: castling. 15% off, 50% rook + empress, 35% those plus one
+	# random extra piece type.
+	var extra_pool := [
+		"bishop", "knight", "queen", "amazon", "princess",
+		"camel", "elephant", "minister", "man"
+	]
+	var extra: String = extra_pool[rng.randi_range(0, extra_pool.size() - 1)]
+	var castle_roll := rng.randi_range(0, 99)
+	var castle_types := {}
+
+	if castle_roll < 15:
+		game_log.write("Castling is disabled", GameLog.GOLD)
+	else:
+		for t in ["rook", "empress"]:
+			if rules.has(t):
+				castle_types[t] = true
+
+		if castle_roll >= 65 and rules.has(extra):
+			castle_types[extra] = true
+
+		var names: Array[String] = []
+		for t in castle_types:
+			names.append(String(t).capitalize())
+
+		game_log.write("Castling: king + %s" % " / ".join(names), GameLog.GOLD)
+
+	return castle_types

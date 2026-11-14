@@ -1,0 +1,13 @@
+{
+  "name": "Knight Maze",
+  "board": [
+    "n.nk.n.n",
+    "pppppppp",
+    "........",
+    "........",
+    "........",
+    "........",
+    "PPPPPPPP",
+    "N.NK.N.N"
+  ]
+}

@@ -26,9 +26,12 @@ const PIECE_PITCHES := {
 	"minister": 6    # C5
 }
 const SETUP_SCENE := "res://Scenes/Main/game_setup.tscn"
-const DEFAULT_PRESET := "res://assets/board/board_layouts/everything.json"
+const PRESET_DIR := "res://assets/board/board_layouts/"
+## Only set when the player picks a file manually. Empty = random from the folder.
 ## Static so it survives restart() reloading the scene.
-static var preset_path := DEFAULT_PRESET
+static var preset_path := ""
+var current_preset := ""
+## Static so it survives restart() reloading the scene.
 
 const DESIGN_SIZE := Vector2(768, 552)
 
@@ -167,9 +170,17 @@ func _ready() -> void:
 		_state,
 		_view
 	)
-	_pending_name = _spawner.spawn_all(
-		DEFAULT_PRESET if _online else preset_path
-	)
+	var presets := list_presets()
+	current_preset = ""
+
+	if not presets.is_empty():
+		current_preset = presets[rng.randi_range(0, presets.size() - 1)]
+
+	# A manually picked file overrides the random choice (offline only).
+	if not _online and preset_path != "":
+		current_preset = preset_path
+
+	_pending_name = _spawner.spawn_all(current_preset)
 
 	_promotion_ui.chosen.connect(_on_promo_chosen)
 
@@ -352,7 +363,23 @@ func _unhandled_input(event: InputEvent) -> void:
 	else:
 		_deselect()
 
+## Every .json in PRESET_DIR, sorted so both peers see the same order.
+static func list_presets() -> Array[String]:
+	var out: Array[String] = []
+	var dir := DirAccess.open(PRESET_DIR)
 
+	if dir == null:
+		return out
+
+	for file_name in dir.get_files():
+		# Exported builds can list resources with a .remap suffix.
+		var clean := file_name.trim_suffix(".remap")
+
+		if clean.ends_with(".json") and not out.has(PRESET_DIR + clean):
+			out.append(PRESET_DIR + clean)
+
+	out.sort()
+	return out
 func _select(piece: AnimatedSprite2D) -> void:
 	_deselect()
 

@@ -47,8 +47,9 @@ func _ready() -> void:
 func _refresh_game_info() -> void:
 	if not is_instance_valid(chess_board):
 		return
-
+	
 	var lines: Array[String] = []
+	lines.append("Starting layout: %s" % chess_board.current_preset.get_file())
 	lines.append("[b]DAILY MODIFICATIONS[/b]")
 
 	for change in chess_board.daily_changes:

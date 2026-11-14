@@ -131,8 +131,8 @@ offset_right = 160.0
 offset_bottom = 108.0
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(160, 100)
 scale = Vector2(0.94, 0.94)
+pivot_offset = Vector2(160, 100)
 mouse_filter = 2
 texture = ExtResource("1_8s5q0")
 expand_mode = 1
@@ -147,6 +147,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
 [node name="left" type="TextureRect" parent="Decorations" unique_id=249663736]
 layout_mode = 1
 anchors_preset = 2
@@ -155,8 +156,8 @@ anchor_bottom = 1.0
 offset_top = -305.0
 offset_right = 180.0
 grow_vertical = 0
-pivot_offset = Vector2(90, 152.5)
 rotation = 3.1415927
+pivot_offset = Vector2(90, 152.5)
 mouse_filter = 2
 texture = ExtResource("2_souyd")
 expand_mode = 1

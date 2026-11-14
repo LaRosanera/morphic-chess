@@ -1,0 +1,13 @@
+{
+  "name": "Royal Rumble",
+  "board": [
+    "rnbqkbnr",
+    "p.p.p.p.",
+    "........",
+    "...a....",
+    "....A...",
+    "........",
+    "P.P.P.P.",
+    "RNBQKBNR"
+  ]
+}

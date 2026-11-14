@@ -40,6 +40,8 @@ const DESIGN_SIZE := Vector2(768, 552)
 @onready var picker: Control = $UI/PromotionPicker
 @onready var log_box: RichTextLabel = $UI/Terminal/Log
 @onready var piano_key_player: AudioStreamPlayer2D = $piano_key_player
+@onready var button_audio: AudioStreamPlayer2D = $ButtonAudio
+
 var daily_changes: Array[String] = []
 
 var player1_name := "White"
@@ -204,6 +206,7 @@ func _fit_to_viewport() -> void:
 # --------------------------------------------------
 
 func restart() -> void:
+	play_button_audio()
 	if _online:
 		_leave_match()
 		return
@@ -286,7 +289,7 @@ func _on_target_chosen(from: Vector2i, to: Vector2i) -> void:
 		if options.size() > 1:
 			pending_promo = {"from": from, "to": to}
 			_deselect()
-			_promotion_ui.show_options(options)
+			_promotion_ui.show_options(options, turn == "white")
 			status.text = "Promote to:"
 			return
 
@@ -440,7 +443,10 @@ func _update_status() -> void:
 # --------------------------------------------------
 # PRESETS / SETTINGS
 # --------------------------------------------------
-
+func play_button_audio() -> void:
+	if button_audio:
+		button_audio.play()
+		
 func open_preset_picker() -> void:
 	if _online:
 		return
@@ -464,4 +470,5 @@ func open_preset_picker() -> void:
 
 
 func _on_settings_pressed() -> void:
+	play_button_audio()
 	Settings.open(self)

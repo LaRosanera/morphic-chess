@@ -91,7 +91,8 @@ func _create_piece_button(
 
 	if frames != null and frames.has_animation(anim_name):
 		icon.texture = frames.get_frame_texture(anim_name, 0)
-
+	if piece_type.to_lower() in ["camel", "minister", "man"]:
+		icon.flip_v = true
 	vbox.add_child(icon)
 
 	# Piece name.

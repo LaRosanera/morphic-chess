@@ -1,3 +1,4 @@
+
 [gd_scene format=3 uid="uid://dgrck20d0hor6"]
 
 [ext_resource type="Script" uid="uid://cxbcqruvqkhev" path="res://scripts/main/game_setup.gd" id="1_pfm0t"]
@@ -5,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cjfrjvuevputu" path="res://Scenes/Chess/classic_black_piece.tscn" id="3_2lmj7"]
 [ext_resource type="PackedScene" uid="uid://cg32l7wtisebm" path="res://Scenes/Chess/classic_white_piece.tscn" id="4_0to1n"]
 [ext_resource type="AudioStream" uid="uid://wto21j0bt3y" path="res://assets/audio/buttonclick.mp3" id="5_0to1n"]
+[ext_resource type="Theme" path="res://assets/themes/settings_theme.tres" id="6_theme"]
 
 [node name="GameSetup" type="Control" unique_id=1063435747]
 layout_mode = 3
@@ -13,6 +15,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("6_theme")
 script = ExtResource("1_pfm0t")
 
 [node name="Background" type="ColorRect" parent="." unique_id=683678014]
@@ -63,7 +66,6 @@ text = "MATCH CONFIGURATION"
 
 [node name="Subtitle" type="Label" parent="Center/Panel/Margin/Content/Header" unique_id=924765133]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.494, 0.988, 0.494, 1)
 theme_override_font_sizes/font_size = 12
 text = "LOCAL TWO-PLAYER / STANDARD STARTING POSITION"
 
@@ -166,7 +168,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/h_separation = 24
 theme_override_constants/v_separation = 12
-columns = 2
+columns = 3
 
 [node name="WhiteField" type="VBoxContainer" parent="Center/Panel/Margin/Content/Fields" unique_id=1064446636]
 layout_mode = 2
@@ -260,14 +262,12 @@ layout_mode = 2
 
 [node name="Summary" type="Label" parent="Center/Panel/Margin/Content/SummaryPanel" unique_id=1893091419]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.494, 0.988, 0.494, 1)
 theme_override_font_sizes/font_size = 14
 text = "White vs Black"
 autowrap_mode = 2
 
 [node name="StatusLabel" type="Label" parent="Center/Panel/Margin/Content" unique_id=331493341]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.737, 0.612, 1)
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 2
 
@@ -296,3 +296,4 @@ texture = ExtResource("2_5vpf3")
 visible = false
 z_index = 3
 stream = ExtResource("5_0to1n")
+bus = &"SFX"

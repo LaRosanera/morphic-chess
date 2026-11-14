@@ -1,0 +1,108 @@
+[gd_resource type="Theme" format=3 uid="uid://8yklbj61k4vr"]
+
+[ext_resource type="FontFile" uid="uid://bq6hb5xg058me" path="res://assets/fonts/CormorantSemiboldItalic-E4AYz.ttf" id="1_font"]
+[ext_resource type="Texture2D" uid="uid://d01u08xpau5k8" path="res://assets/icons/bar_assets/slider_grabber.svg" id="2_grabber"]
+[ext_resource type="Texture2D" uid="uid://cw4n4medwsug6" path="res://assets/icons/bar_assets/slider_track.svg" id="3_track"]
+[ext_resource type="Texture2D" uid="uid://bg7jufplscpc8" path="res://assets/icons/bar_assets/slider_fill.svg" id="4_fill"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_normal"]
+content_margin_left = 12.0
+content_margin_top = 7.0
+content_margin_right = 12.0
+content_margin_bottom = 7.0
+bg_color = Color(0.055, 0.045, 0.065, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.27, 0.39, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hover"]
+content_margin_left = 12.0
+content_margin_top = 7.0
+content_margin_right = 12.0
+content_margin_bottom = 7.0
+bg_color = Color(0.16, 0.105, 0.17, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.72, 0.43, 0.66, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_focus"]
+
+[sub_resource type="StyleBoxFlat" id="CheckButton_normal"]
+content_margin_left = 12.0
+bg_color = Color(0.055, 0.045, 0.065, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.27, 0.39, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxEmpty" id="CheckButton_focus"]
+
+[sub_resource type="StyleBoxFlat" id="CheckButton_hover"]
+content_margin_left = 12.0
+bg_color = Color(0.16, 0.105, 0.17, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.72, 0.43, 0.66, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fill"]
+texture = ExtResource("4_fill")
+texture_margin_left = 5.0
+texture_margin_top = 3.0
+texture_margin_right = 5.0
+texture_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_track"]
+texture = ExtResource("3_track")
+texture_margin_left = 7.0
+texture_margin_top = 7.0
+texture_margin_right = 7.0
+texture_margin_bottom = 7.0
+
+[resource]
+default_font = ExtResource("1_font")
+default_font_size = 17
+Button/colors/font_color = Color(0.88, 0.84, 0.91, 1)
+Button/colors/font_disabled_color = Color(0.4, 0.38, 0.43, 1)
+Button/colors/font_focus_color = Color(1, 0.9, 1, 1)
+Button/colors/font_hover_color = Color(1, 0.82, 0.94, 1)
+Button/colors/font_pressed_color = Color(0.78, 0.57, 0.76, 1)
+Button/fonts/font = ExtResource("1_font")
+Button/styles/disabled = SubResource("StyleBoxFlat_normal")
+Button/styles/focus = SubResource("StyleBoxFlat_hover")
+Button/styles/hover = SubResource("StyleBoxFlat_hover")
+Button/styles/normal = SubResource("StyleBoxFlat_normal")
+Button/styles/pressed = SubResource("StyleBoxFlat_hover")
+CheckBox/styles/focus = SubResource("StyleBoxEmpty_focus")
+CheckButton/styles/disabled = SubResource("CheckButton_normal")
+CheckButton/styles/focus = SubResource("CheckButton_focus")
+CheckButton/styles/hover = SubResource("CheckButton_hover")
+CheckButton/styles/hover_pressed = SubResource("CheckButton_hover")
+CheckButton/styles/normal = SubResource("CheckButton_normal")
+CheckButton/styles/pressed = SubResource("CheckButton_hover")
+HSlider/icons/grabber = ExtResource("2_grabber")
+HSlider/icons/grabber_highlight = ExtResource("2_grabber")
+HSlider/styles/grabber_area = SubResource("StyleBoxTexture_fill")
+HSlider/styles/slider = SubResource("StyleBoxTexture_track")

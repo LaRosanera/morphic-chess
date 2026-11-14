@@ -65,7 +65,6 @@ var waiting := false  # hosting/joining in progress, waiting on the network
 
 func _ready() -> void:
 	_build_options()
-	_apply_styles()
 	_connect_signals()
 	_connect_button_sounds(self)
 	_restore_settings()
@@ -113,82 +112,6 @@ func _connect_signals() -> void:
 	NetworkManager.match_ready.connect(_on_match_ready)
 	NetworkManager.connection_failed.connect(_on_connection_failed)
 
-
-# --------------------------------------------------
-# STYLING
-# --------------------------------------------------
-
-func _apply_styles() -> void:
-	panel.add_theme_stylebox_override(
-		"panel",
-		_style(Color("#111923"), Color("#405568"))
-	)
-
-	summary_panel.add_theme_stylebox_override(
-		"panel",
-		_style(Color("#090f0c"), Color("#304b3b"))
-	)
-
-	for widget in [
-		white_name,
-		black_name,
-		time_control,
-		orientation,
-		seed_input,
-		daily_seed,
-		back_button,
-		start_button,
-		local_tab,
-		online_tab,
-		online_name,
-		role_select,
-		ip_input,
-		port_input
-	]:
-		_style_widget(widget)
-
-	start_button.add_theme_stylebox_override(
-		"normal",
-		_style(Color("#203c30"), Color("#7efc7e"))
-	)
-
-	# The selected tab stays highlighted.
-	var selected := _style(Color("#203c30"), Color("#7efc7e"))
-	for tab in [local_tab, online_tab]:
-		tab.add_theme_stylebox_override("pressed", selected)
-		tab.add_theme_stylebox_override("hover_pressed", selected)
-
-
-func _style_widget(widget: Control) -> void:
-	var normal := _style(Color("#192330"), Color("#45596d"))
-	var hover := _style(Color("#253547"), Color("#7efc7e"))
-	var focus := _style(Color.TRANSPARENT, Color("#7efc7e"))
-
-	widget.add_theme_stylebox_override("normal", normal)
-	widget.add_theme_stylebox_override("hover", hover)
-	widget.add_theme_stylebox_override("pressed", hover)
-	widget.add_theme_stylebox_override("focus", focus)
-
-	widget.add_theme_font_size_override("font_size", 14)
-	widget.add_theme_color_override("font_color", Color("#edf3fa"))
-
-	if widget is Button:
-		widget.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-
-
-func _style(fill: Color, border: Color) -> StyleBoxFlat:
-	var box := StyleBoxFlat.new()
-	box.bg_color = fill
-	box.border_color = border
-	box.set_border_width_all(2)
-	box.set_corner_radius_all(0)
-	box.content_margin_left = 10
-	box.content_margin_right = 10
-	box.content_margin_top = 6
-	box.content_margin_bottom = 6
-	return box
-
-
 # --------------------------------------------------
 # MODE / LAYOUT
 # --------------------------------------------------
@@ -226,8 +149,8 @@ func _refresh_layout() -> void:
 	# Host: Name | Connection | Port on one row, Time | Seed | Daily on one row.
 	# Join: Name | Connection, then IP | Port.
 	var hosting := _is_hosting()
-	online_fields.columns = 3 if hosting else 2
-	fields_grid.columns = 3 if hosting else 2
+	online_fields.columns = 3
+	fields_grid.columns = 3
 
 	# Let the cells share the width evenly while online.
 	var flag := Control.SIZE_EXPAND_FILL if online else Control.SIZE_FILL
@@ -346,9 +269,9 @@ func _on_daily_seed(_enabled: bool) -> void:
 
 
 func _update_seed() -> void:
-	seed_input.editable = not daily_seed.button_pressed
-	seed_input.modulate = Color.WHITE if not daily_seed.button_pressed else Color("#777777")
-
+	var enabled := not daily_seed.button_pressed
+	seed_input.editable = enabled
+	seed_input.modulate = Color.WHITE if enabled else Color(0.65, 0.65, 0.65, 1.0)
 
 # --------------------------------------------------
 # SETTINGS

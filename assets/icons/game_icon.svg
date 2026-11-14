@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256">
+  <defs>
+    <!-- Pawn silhouette, kept as a single shared shape. -->
+    <path id="pawn" d="M128 45
+      C115.4 45 105.2 55.2 105.2 67.8
+      C105.2 72.9 106.9 77.6 109.7 81.4
+      C98.6 87.8 91 99.8 91 113.5
+      C91 125.1 96.4 135.4 104.8 142.2
+      C87.7 148.2 62.6 173.8 62.6 218.6
+      L193.4 218.6
+      C193.4 173.8 168.3 148.2 151.2 142.2
+      C159.6 135.4 165 125.1 165 113.5
+      C165 99.8 157.4 87.8 146.3 81.4
+      C149.1 77.6 150.8 72.9 150.8 67.8
+      C150.8 55.2 140.6 45 128 45 Z"/>
+    <clipPath id="pawnClip"><use href="#pawn"/></clipPath>
+  </defs>
+  <g transform="translate(0 256) scale(1 -1)">
+  <!-- White left half and black right half, clipped to the pawn. -->
+  <g clip-path="url(#pawnClip)">
+    <rect x="0" y="0" width="128" height="256" fill="#ffffff"/>
+    <rect x="128" y="0" width="128" height="256" fill="#000000"/>
+
+    <!-- Irregular monochrome stone polygons on the white half. -->
+    <g stroke="#000000" stroke-width="1.1" stroke-linejoin="round">
+      <path fill="#eeeeee" d="M0 0H43L28 37 0 51Z"/>
+      <path fill="#ffffff" d="M43 0H91L77 29 28 37Z"/>
+      <path fill="#d8d8d8" d="M91 0H128V43L77 29Z"/>
+      <path fill="#f5f5f5" d="M0 51L28 37 61 83 0 98Z"/>
+      <path fill="#cfcfcf" d="M28 37L77 29 61 83Z"/>
+      <path fill="#f8f8f8" d="M77 29L128 43 109 92 61 83Z"/>
+      <path fill="#e5e5e5" d="M0 98L61 83 47 137 0 151Z"/>
+      <path fill="#ffffff" d="M61 83L109 92 96 145 47 137Z"/>
+      <path fill="#d5d5d5" d="M109 92L128 91V143L96 145Z"/>
+      <path fill="#f1f1f1" d="M0 151L47 137 73 194 0 205Z"/>
+      <path fill="#dcdcdc" d="M47 137L96 145 111 199 73 194Z"/>
+      <path fill="#ffffff" d="M96 145L128 143V200L111 199Z"/>
+      <path fill="#e8e8e8" d="M0 205L73 194 58 256H0Z"/>
+      <path fill="#f7f7f7" d="M73 194L111 199 125 256H58Z"/>
+      <path fill="#d0d0d0" d="M111 199L128 200V256H125Z"/>
+    </g>
+
+    <!-- Matching black stone facets on the black half. -->
+    <g stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.1" stroke-linejoin="round">
+      <path fill="#111111" d="M128 0H184L168 34 128 43Z"/>
+      <path fill="#242424" d="M184 0H228L216 39 168 34Z"/>
+      <path fill="#090909" d="M228 0H256V51L216 39Z"/>
+      <path fill="#202020" d="M128 43L168 34 157 91 128 91Z"/>
+      <path fill="#080808" d="M168 34L216 39 198 88 157 91Z"/>
+      <path fill="#292929" d="M216 39L256 51V98L198 88Z"/>
+      <path fill="#171717" d="M128 91L157 91 144 143 128 143Z"/>
+      <path fill="#252525" d="M157 91L198 88 187 142 144 143Z"/>
+      <path fill="#0b0b0b" d="M198 88L256 98V151L187 142Z"/>
+      <path fill="#222222" d="M128 143L144 143 158 200 128 200Z"/>
+      <path fill="#0a0a0a" d="M144 143L187 142 207 195 158 200Z"/>
+      <path fill="#292929" d="M187 142L256 151V205L207 195Z"/>
+      <path fill="#151515" d="M128 200L158 200 174 256H128Z"/>
+      <path fill="#242424" d="M158 200L207 195 220 256H174Z"/>
+      <path fill="#090909" d="M207 195L256 205V256H220Z"/>
+    </g>
+  </g>
+
+  <!-- Crisp center seam and outer contour. -->
+  <path d="M128 45V218.6" fill="none" stroke="#000000" stroke-width="1.5"/>
+  <use href="#pawn" fill="none" stroke="#000000" stroke-width="4" stroke-linejoin="round"/>
+</svg>

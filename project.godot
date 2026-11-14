@@ -11,9 +11,14 @@ config_version=5
 [application]
 
 config/name="Morphic Chess"
+config/version="0.19"
 run/main_scene="uid://sopqo7erh32j"
 config/features=PackedStringArray("4.7", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://vwy80uh4cfse"
+
+[audio]
+
+buses/default_bus_layout="uid://cemeehfgwyxt0"
 
 [autoload]
 

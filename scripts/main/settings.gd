@@ -14,7 +14,7 @@ const WHITE_PIECE_SCENE: PackedScene = preload("res://Scenes/Chess/classic_white
 @onready var tabs: TabContainer = $Center/Panel/Margin/Main/Tabs
 @onready var close_button: Button = $Center/Panel/Margin/Main/Header/Close
 @onready var main_menu_button: Button = $Center/Panel/Margin/Main/Footer/MainMenu
-
+@onready var button_audio: AudioStreamPlayer2D = $ButtonAudio
 const RESOLUTIONS: Array[Vector2i] = [
 	Vector2i(768, 552),
 	Vector2i(1152, 828),
@@ -37,6 +37,7 @@ func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	z_index = 100
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	tabs.tab_changed.connect(_on_tab_changed)
 	_setup_audio()
 	_setup_display()
 ## USED DURING THE GAME
@@ -72,14 +73,20 @@ func _refresh_game_info() -> void:
 
 	game_info.text = "\n".join(lines)
 	_build_rules_list()
+	
+	
 ## USED OUTSDIE
 func _refresh_display_state() -> void:
 	# No-signal version, so setting the checkbox doesn't toggle fullscreen again.
 	fullscreen_check.set_pressed_no_signal(_is_fullscreen())
 	_sync_resolution_option()
 	
-
-
+func _play_button_audio() -> void:
+	if button_audio:
+		button_audio.stop()
+		button_audio.play()
+func _on_tab_changed(_tab: int) -> void:
+	_play_button_audio()
 func _setup_audio() -> void:
 	_connect_audio_slider(master_slider, "Master")
 	_connect_audio_slider(music_slider, "Music")
@@ -131,22 +138,25 @@ func _sync_resolution_option() -> void:
 
 
 func _on_resolution_selected(index: int) -> void:
+	_play_button_audio()
+
 	var size := _sizes[index]
 	var screen := DisplayServer.window_get_current_screen()
 	var origin := DisplayServer.screen_get_position(screen)
 	var screen_size := DisplayServer.screen_get_size(screen)
 
 	DisplayServer.window_set_size(size)
-	# Re-center so the window doesn't hang off the screen edge.
 	DisplayServer.window_set_position(origin + (screen_size - size) / 2)
 
 
 func _on_fullscreen_toggled(enabled: bool) -> void:
+	_play_button_audio()
+
 	DisplayServer.window_set_mode(
 		DisplayServer.WINDOW_MODE_FULLSCREEN if enabled
 		else DisplayServer.WINDOW_MODE_WINDOWED
 	)
-	# The window size can take a frame to update after a mode change.
+
 	await get_tree().process_frame
 	_sync_resolution_option()
 func _build_rules_list() -> void:
@@ -168,6 +178,10 @@ func _build_rules_list() -> void:
 		icon.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		icon.texture = _piece_texture(frames, piece_type)
+
+		if piece_type.to_lower() in ["camel", "minister", "man"]:
+			icon.flip_v = true
+
 		row.add_child(icon)
 
 		var info := RichTextLabel.new()
@@ -244,21 +258,25 @@ func close() -> void:
 	chess_board = null
 	
 func _on_close_pressed() -> void:
+	_play_button_audio()
 	close()
 
 
 func _on_main_menu_pressed() -> void:
+	_play_button_audio()
+
 	NetworkManager.shutdown()
 	close()
+
+	Transition.fade()
+	await Transition.on_transition_finished
+
 	get_tree().change_scene_to_file(MAIN_MENU_PATH)
 
 func _on_quit_pressed() -> void:
-	var tree := get_tree()
+	_play_button_audio()
 
-	print("QUIT 1: handler entered; host=", NetworkManager.is_host)
+	await button_audio.finished
 
 	NetworkManager.shutdown()
-	print("QUIT 2: shutdown returned")
-
-	tree.quit()
-	print("QUIT 3: exit requested")
+	get_tree().quit()

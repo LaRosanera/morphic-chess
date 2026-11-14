@@ -5,7 +5,8 @@ const SETUP_SCENE := "res://scenes/main/game_setup.tscn"
 const WHITE_PIECE_SCENE := "res://Scenes/Chess/classic_white_piece.tscn"
 const BLACK_PIECE_SCENE := "res://Scenes/Chess/classic_black_piece.tscn"
 const SETTINGS_SCENE = preload("res://Scenes/Main/settings.tscn")
-const DAILY_SEED_PATH = "res://data/daily_seed.json"
+const DAILY_SEED_PATH := "user://daily_seed.json"
+
 const COPIES_PER_PIECE := 3
 const COLUMNS := 9
 const EXPECTED_ANIMATIONS := 13
@@ -16,7 +17,7 @@ const EXPECTED_ANIMATIONS := 13
 @onready var play_button: Button = $MenuCanvas/Panel/Margin/Content/PlayButton
 @onready var motion_button: CheckButton = $MenuCanvas/Panel/Margin/Content/MotionButton
 @onready var quit_button: Button = $MenuCanvas/Panel/Margin/Content/QuitButton
-@onready var status_label: Label = $MenuCanvas/Panel/Margin/Content/StatusLabel
+@onready var status_label: Label = get_node_or_null("MenuCanvas/Panel/Margin/Content/StatusLabel")
 @onready var panel: PanelContainer = $MenuCanvas/Panel
 @onready var seed_label: Label = $MenuCanvas/Panel/Margin/Content/SeedLabel
 @onready var button_audio: AudioStreamPlayer2D = $ButtonAudio
@@ -26,7 +27,6 @@ var reduced_motion := false
 var transitioning := false
 
 var rng := RandomNumberGenerator.new()
-
 var daily_seed: int
 
 var pieces: Array[Node2D] = []
@@ -36,7 +36,23 @@ var scales: Array[float] = []
 
 
 func _ready() -> void:
-	# Generate today's seed using MMDDYYYY.
+	_generate_daily_seed()
+
+	reduced_motion = get_tree().get_meta("reduced_motion", false)
+	motion_button.button_pressed = reduced_motion
+
+	_apply_styles()
+
+	play_button.pressed.connect(_open_setup)
+	motion_button.toggled.connect(_set_reduced_motion)
+	quit_button.pressed.connect(_quit_game)
+
+	play_button.grab_focus()
+
+	_create_pieces()
+
+
+func _generate_daily_seed() -> void:
 	var date := Time.get_date_dict_from_system()
 
 	daily_seed = int("%02d%02d%04d" % [
@@ -45,128 +61,102 @@ func _ready() -> void:
 		date["year"]
 	])
 
-	# Use the date as the random number generator seed.
 	rng.seed = daily_seed
-	var seed_file = FileAccess.open(DAILY_SEED_PATH, FileAccess.WRITE)
+
+	var seed_file := FileAccess.open(DAILY_SEED_PATH, FileAccess.WRITE)
+
 	if seed_file:
-		seed_file.store_string(str(daily_seed))
+		seed_file.store_string(JSON.stringify({
+			"daily_seed": daily_seed
+		}))
 		seed_file.close()
 	else:
-		print("ERROR. COULD NOT ACCESS SEED FILE")
-	# Make the seed accessible to other scenes.
+		push_warning("Could not save daily seed: " + DAILY_SEED_PATH)
+
 	get_tree().set_meta("daily_seed", daily_seed)
-	
-	seed_label.text = " DAILY SEED: %08d" % daily_seed
 
-	_apply_styles()
-
-	reduced_motion = get_tree().get_meta("reduced_motion", false)
-	motion_button.button_pressed = reduced_motion
-
-	play_button.pressed.connect(_open_setup)
-	motion_button.toggled.connect(_set_reduced_motion)
-	quit_button.pressed.connect(_quit_game)
-
-	
-
-	play_button.grab_focus()
-	
-	_create_pieces()
+	seed_label.text = "DAILY SEED: %08d" % daily_seed
 
 
 func _apply_styles() -> void:
-	panel.add_theme_stylebox_override(
-		"panel",
-		_style(Color("#111923"), Color("#405568"))
-	)
+	var panel_style := StyleBoxFlat.new()
 
-	_style_button(play_button, true)
-	_style_button(quit_button, false)
+	panel_style.bg_color = Color("#100D16")
+	panel_style.border_color = Color("#514052")
+	panel_style.set_border_width_all(1)
+	panel_style.set_corner_radius_all(0)
 
-
-func _style_button(button: Button, primary: bool) -> void:
-	var fill := Color("#203c30") if primary else Color("#192330")
-	var border := Color("#7efc7e") if primary else Color("#45596d")
-
-	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	button.add_theme_font_size_override("font_size", 16)
-
-	button.add_theme_color_override("font_color", Color("#e8f0f7"))
-	button.add_theme_color_override("font_hover_color", Color("#ffffff"))
-	button.add_theme_color_override("font_pressed_color", Color("#7efc7e"))
-
-	button.add_theme_stylebox_override(
-		"normal", _style(fill, border)
-	)
-	button.add_theme_stylebox_override(
-		"hover", _style(fill.lightened(0.12), Color("#7efc7e"))
-	)
-	button.add_theme_stylebox_override(
-		"pressed", _style(fill.darkened(0.2), Color("#7efc7e"))
-	)
-	button.add_theme_stylebox_override(
-		"focus", _style(Color(0, 0, 0, 0), Color("#eef8ff"))
-	)
+	panel.add_theme_stylebox_override("panel", panel_style)
 
 
-func _style(fill: Color, border: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = fill
-	style.border_color = border
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(0)
-	style.content_margin_left = 12
-	style.content_margin_right = 12
-	style.content_margin_top = 8
-	style.content_margin_bottom = 8
-	return style
+func _set_status(message: String) -> void:
+	if status_label != null:
+		status_label.text = message
+	else:
+		push_warning(message)
 
 
-# Find an AnimatedSprite2D even if it is nested inside another node.
+# Find an AnimatedSprite2D even if nested inside another node.
 func _find_animated_sprite(node: Node) -> AnimatedSprite2D:
 	if node is AnimatedSprite2D:
 		return node as AnimatedSprite2D
 
 	for child in node.get_children():
 		var found := _find_animated_sprite(child)
+
 		if found != null:
 			return found
 
 	return null
 
 
-# Create 3 copies of every animation for both piece sets.
+# Create three copies of every animation for both piece sets.
 func _create_pieces() -> void:
-	
 	var packed_scenes: Array[PackedScene] = []
-	
+
 	# Load both piece scenes.
 	for path in [WHITE_PIECE_SCENE, BLACK_PIECE_SCENE]:
+		if not ResourceLoader.exists(path):
+			_set_status("ARTWORK ERROR / MISSING SCENE: " + path)
+			return
+
 		var packed := load(path) as PackedScene
 
 		if packed == null:
-			status_label.text = "ARTWORK ERROR / CHECK PIECE SCENE PATHS"
+			_set_status("ARTWORK ERROR / COULD NOT LOAD PIECE SCENE")
 			return
 
 		packed_scenes.append(packed)
-	
-	# Collect all animation names from both scenes.
+
+	# Collect animation names from both scenes.
 	var specs: Array[Dictionary] = []
+
 	for scene_index in range(packed_scenes.size()):
 		var probe := packed_scenes[scene_index].instantiate()
 		var animated_sprite := _find_animated_sprite(probe)
 
 		if animated_sprite == null:
 			probe.free()
+			_set_status("ARTWORK ERROR / ANIMATED SPRITE NOT FOUND")
 			return
-		
+
+		if animated_sprite.sprite_frames == null:
+			probe.free()
+			_set_status("ARTWORK ERROR / SPRITE FRAMES NOT FOUND")
+			return
+
 		var names := animated_sprite.sprite_frames.get_animation_names()
 
 		if names.size() != EXPECTED_ANIMATIONS:
 			probe.free()
-			print("Scene %d has %d animations: %s" % [scene_index, names.size(), names])
+			_set_status("ARTWORK ERROR / UNEXPECTED ANIMATION COUNT")
+			print("Scene %d has %d animations: %s" % [
+				scene_index,
+				names.size(),
+				names
+			])
 			return
-		
+
 		for anim_name in names:
 			for copy in range(COPIES_PER_PIECE):
 				specs.append({
@@ -175,6 +165,7 @@ func _create_pieces() -> void:
 				})
 
 		probe.free()
+
 	var total := specs.size()
 	var rows := int(ceil(float(total) / float(COLUMNS)))
 
@@ -190,7 +181,7 @@ func _create_pieces() -> void:
 		var temp := cells[i]
 		cells[i] = cells[other]
 		cells[other] = temp
-	
+
 	# Spawn all pieces.
 	for i in range(total):
 		var spec: Dictionary = specs[i]
@@ -198,32 +189,31 @@ func _create_pieces() -> void:
 		var piece := packed_scenes[spec["scene"]].instantiate() as Node2D
 
 		if piece == null:
-			status_label.text = "ARTWORK ERROR / PIECE ROOT MUST BE NODE2D"
+			_set_status("ARTWORK ERROR / PIECE ROOT MUST BE NODE2D")
 			return
 
 		var sprite := _find_animated_sprite(piece)
 
 		if sprite == null:
 			piece.free()
-			status_label.text = "ARTWORK ERROR / SPRITE NOT FOUND"
+			_set_status("ARTWORK ERROR / SPRITE NOT FOUND")
 			return
 
 		sprite.animation = spec["anim"]
 		sprite.stop()
 
-		# Keep pieces subtle in the background.
+		# Subtle monochromatic purple tint.
 		piece.modulate = Color(
-			0.8,
-			0.9,
-			1.0,
-			rng.randf_range(0.22, 0.48)
+			rng.randf_range(0.72, 0.88),
+			rng.randf_range(0.62, 0.76),
+			rng.randf_range(0.78, 0.92),
+			rng.randf_range(0.22, 0.42)
 		)
-		
-		piece_layer.add_child(piece)
 
+		piece_layer.add_child(piece)
 		pieces.append(piece)
 
-		# Assign a randomized grid position.
+		# Assign randomized grid positions.
 		var cell := cells[i]
 		var row := floori(float(cell) / float(COLUMNS))
 
@@ -239,8 +229,6 @@ func _create_pieces() -> void:
 		scales.append(rng.randf_range(0.85, 1.65))
 
 	_update_pieces()
-
-
 
 
 func _process(delta: float) -> void:
@@ -287,20 +275,19 @@ func _play_click() -> void:
 		button_audio.play()
 
 
-# Plays the click, starts the fade, and runs `action` once the screen is black.
+# Play the click, fade the screen, then execute the action.
 func _transition_then(action: Callable) -> void:
 	if transitioning:
 		return
 
 	transitioning = true
+
 	play_button.disabled = true
 	quit_button.disabled = true
 	motion_button.disabled = true
 
 	_play_click()
 
-	# Don't await fade(): it also waits on the audio-fade loop.
-	# Wait for the signal instead, which fires when fade_to_black ends.
 	Transition.fade()
 	await Transition.on_transition_finished
 
@@ -316,10 +303,12 @@ func _change_to_setup() -> void:
 
 	if error != OK:
 		transitioning = false
+
 		play_button.disabled = false
 		quit_button.disabled = false
 		motion_button.disabled = false
-		status_label.text = "Could not open game setup. Check the scene path."
+
+		_set_status("Could not open game setup. Check the scene path.")
 
 
 func _quit_game() -> void:

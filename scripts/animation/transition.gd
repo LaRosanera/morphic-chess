@@ -8,6 +8,7 @@ signal on_transition_finished
 var old_value = 0
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	layer = 127
 	color_rect.visible = false
 	
 #call through other scripts. Put into auto load

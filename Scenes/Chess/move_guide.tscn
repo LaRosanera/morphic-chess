@@ -1,0 +1,137 @@
+[gd_scene format=3 uid="uid://djgyer4m7woca"]
+
+[ext_resource type="Script" uid="uid://o7g52ap8ycd4" path="res://scripts/chess/move_guide.gd" id="1_guide"]
+[ext_resource type="Texture2D" uid="uid://cdi0pqhp6mtp4" path="res://assets/board/chess_board_tiles.svg" id="2_tiles"]
+[ext_resource type="AudioStream" uid="uid://wto21j0bt3y" path="res://assets/audio/buttonclick.mp3" id="3_click"]
+[ext_resource type="Theme" uid="uid://bjpdwykllqede" path="res://assets/themes/settings_theme.tres" id="4_theme"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tiles"]
+texture = ExtResource("2_tiles")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+1:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_guide"]
+tile_size = Vector2i(64, 64)
+sources/0 = SubResource("TileSetAtlasSource_tiles")
+
+[node name="MoveGuide" type="Control" unique_id=1421289784]
+z_index = 5
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4_theme")
+script = ExtResource("1_guide")
+
+[node name="Dim" type="ColorRect" parent="." unique_id=1441280001]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="Center" type="CenterContainer" parent="." unique_id=705289210]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center" unique_id=202664637]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel" unique_id=568476683]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 12
+
+[node name="Main" type="VBoxContainer" parent="Center/Panel/Margin" unique_id=163632491]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="Center/Panel/Margin/Main" unique_id=1205543416]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/Main/Header" unique_id=760183461]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 24
+text = "MOVE GUIDE"
+
+[node name="Close" type="Button" parent="Center/Panel/Margin/Main/Header" unique_id=1813485319]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "CLOSE"
+
+[node name="Ready" type="Button" parent="Center/Panel/Margin/Main" unique_id=600154745]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+text = "READY"
+
+[node name="Body" type="HBoxContainer" parent="Center/Panel/Margin/Main" unique_id=1851759161]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="PieceList" type="ItemList" parent="Center/Panel/Margin/Main/Body" unique_id=2003988965]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+fixed_icon_size = Vector2i(32, 32)
+
+[node name="BoardColumn" type="VBoxContainer" parent="Center/Panel/Margin/Main/Body" unique_id=1177708228]
+layout_mode = 2
+
+[node name="BoardHolder" type="Control" parent="Center/Panel/Margin/Main/Body/BoardColumn" unique_id=410227384]
+custom_minimum_size = Vector2(270, 270)
+clip_contents = true
+layout_mode = 2
+
+[node name="Board" type="Node2D" parent="Center/Panel/Margin/Main/Body/BoardColumn/BoardHolder" unique_id=2072312257]
+scale = Vector2(0.6, 0.6)
+
+[node name="Tiles" type="TileMapLayer" parent="Center/Panel/Margin/Main/Body/BoardColumn/BoardHolder/Board" unique_id=154797648]
+unique_name_in_owner = true
+tile_set = SubResource("TileSet_guide")
+
+[node name="Highlights" type="Node2D" parent="Center/Panel/Margin/Main/Body/BoardColumn/BoardHolder/Board" unique_id=1214533860]
+unique_name_in_owner = true
+
+[node name="Pieces" type="Node2D" parent="Center/Panel/Margin/Main/Body/BoardColumn/BoardHolder/Board" unique_id=739044865]
+unique_name_in_owner = true
+
+[node name="ObstaclesCheck" type="CheckButton" parent="Center/Panel/Margin/Main/Body/BoardColumn" unique_id=16900319]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Pieces in the way"
+
+[node name="FirstMoveCheck" type="CheckButton" parent="Center/Panel/Margin/Main/Body/BoardColumn" unique_id=1533909392]
+unique_name_in_owner = true
+layout_mode = 2
+text = "First move"
+
+[node name="Info" type="RichTextLabel" parent="Center/Panel/Margin/Main/Body" unique_id=1322430198]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+bbcode_enabled = true
+
+[node name="ButtonAudio" type="AudioStreamPlayer2D" parent="." unique_id=751062643]
+unique_name_in_owner = true
+z_index = 3
+stream = ExtResource("3_click")
+bus = &"SFX"
+
+[connection signal="pressed" from="Center/Panel/Margin/Main/Header/Close" to="." method="_on_close_pressed"]
+[connection signal="pressed" from="Center/Panel/Margin/Main/Ready" to="." method="_on_ready_pressed"]

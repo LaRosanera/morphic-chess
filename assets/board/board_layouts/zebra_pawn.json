@@ -1,0 +1,13 @@
+{
+  "name": "Zebra Pawn",
+  "board": [
+	"rbnqknbr",
+	"........",
+	"pPpPpPpP",
+	"........",
+	"........",
+	"PpPpPpPp",
+	"........",
+    "RBNQKNBR"
+  ]
+}

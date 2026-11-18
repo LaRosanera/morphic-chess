@@ -3,6 +3,8 @@ extends Node2D
 ## Game rules/state, visuals, spawning, promotion UI, logging, and networking
 ## are handled by the helper classes.
 
+const MOVE_GUIDE := preload("res://Scenes/Chess/move_guide.tscn")
+
 @export var white_piece_scene: PackedScene
 @export var black_piece_scene: PackedScene
 
@@ -27,14 +29,17 @@ const PIECE_PITCHES := {
 }
 const SETUP_SCENE := "res://Scenes/Main/game_setup.tscn"
 const PRESET_DIR := "res://assets/board/board_layouts/"
+
 ## Only set when the player picks a file manually. Empty = random from the folder.
 ## Static so it survives restart() reloading the scene.
 static var preset_path := ""
 var current_preset := ""
-## Static so it survives restart() reloading the scene.
+
+## Set by restart() so the reloaded scene skips the guide exactly once.
+static var skip_intro_once := false
 
 const DESIGN_SIZE := Vector2(768, 552)
-
+@onready var guide: Button = $UI/Guide
 @onready var background_rect: ColorRect = $background/ColorRect
 @onready var tiles: TileMapLayer = $TileMapLayer
 @onready var pieces: Node2D = $Pieces
@@ -78,6 +83,12 @@ var _clock_labels := {}
 var _clock_synced := true
 var _sync_retry := 0.0
 var time_expired := false
+
+# --- Move guide intro ---
+var _guide: Control
+var _game_started := false
+var _ready_colors := {"white": false, "black": false}
+var _ready_resend := 0.0
 
 # Compatibility properties: existing scene scripts/settings can continue
 # reading the names exposed by the previous chessBoardScript.gd.
@@ -216,6 +227,7 @@ func _ready() -> void:
 	_log("MORPHIC CHESS v0.1")
 	_log("------------------")
 	_log("No check rules. Capture the enemy king to win.")
+	_log("!!!CLICK READY TO START!!!")
 	_log("%s to move.\n" % player1_name)
 
 	if _online:
@@ -232,6 +244,9 @@ func _ready() -> void:
 	if _pending_name != "":
 		_log("Preset: %s\n" % _pending_name, GameLog.GOLD)
 
+	_begin_intro()
+
+
 # Centers the board/UI in the window and stretches the backdrop to fill it.
 func _fit_to_viewport() -> void:
 	var view := get_viewport_rect().size
@@ -243,10 +258,112 @@ func _fit_to_viewport() -> void:
 	# cover the whole window.
 	background_rect.position = -offset
 	background_rect.size = view
-	
-#TIME
+
+
+# --------------------------------------------------
+# MOVE GUIDE INTRO
+# --------------------------------------------------
+
+func _begin_intro() -> void:
+	if skip_intro_once:
+		skip_intro_once = false
+		_game_started = true
+		return
+
+	_ensure_guide()
+
+	var colors: Array[String] = ["white", "black"]
+	if _online:
+		colors = [local_color]
+
+	_guide.open_intro(self, colors)
+
+
+func _ensure_guide() -> void:
+	if _guide != null and is_instance_valid(_guide):
+		return
+
+	# CanvasLayer so the overlay ignores this node's centering offset.
+	var layer := CanvasLayer.new()
+	layer.layer = 50
+	add_child(layer)
+
+	_guide = MOVE_GUIDE.instantiate()
+	layer.add_child(_guide)
+	_guide.player_ready.connect(_on_player_ready)
+
+
+func _on_guide_pressed() -> void:
+	play_button_audio()
+	_ensure_guide()
+	_guide.open(self)
+
+
+func _on_player_ready(color: String) -> void:
+	_ready_colors[color] = true
+
+	if _online:
+		_send_ready(false)
+
+	_check_start()
+
+
+func _check_start() -> void:
+	if _game_started:
+		return
+
+	if _ready_colors["white"] and _ready_colors["black"]:
+		_start_game()
+		return
+
+	if _guide == null:
+		return
+
+	if _online:
+		if _ready_colors[local_color]:
+			_guide.set_status("Waiting for your opponent to click READY...")
+	else:
+		var missing := "Black" if _ready_colors["white"] else "White"
+		if _ready_colors["white"] or _ready_colors["black"]:
+			_guide.set_status("Waiting for %s to click READY..." % missing)
+
+
+func _start_game() -> void:
+	if _game_started:
+		return
+
+	_game_started = true
+
+	if _guide != null:
+		_guide.close()
+
+	_log("Both players ready. Game on!\n", GameLog.GOLD)
+	_update_status()
+
+
+func _send_ready(is_reply: bool) -> void:
+	if multiplayer.has_multiplayer_peer():
+		_remote_ready.rpc(is_reply)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func _remote_ready(is_reply: bool) -> void:
+	var other := "black" if local_color == "white" else "white"
+	_ready_colors[other] = true
+
+	# We already started but the opponent is still waiting on us (their
+	# message to us arrived before our scene was ready): tell them again.
+	if _game_started and not is_reply:
+		_send_ready(true)
+
+	_check_start()
+
+
+# TIME
 func _process(delta: float) -> void:
-	_clock.tick(delta)
+	# The clock doesn't run while players are reading the guide.
+	if _game_started:
+		_clock.tick(delta)
 	_update_clock_labels()
 
 	# Guest: keep asking until the host's board has loaded and answered.
@@ -255,6 +372,14 @@ func _process(delta: float) -> void:
 		if _sync_retry >= 0.5:
 			_sync_retry = 0.0
 			_clock_sync.ask_host()
+
+	# Our READY click may arrive before the opponent's board exists, so
+	# keep re-sending it until the game starts.
+	if _online and not _game_started and _ready_colors[local_color]:
+		_ready_resend += delta
+		if _ready_resend >= 0.5:
+			_ready_resend = 0.0
+			_send_ready(false)
 
 
 func _build_clock_ui() -> void:
@@ -321,7 +446,7 @@ func _end_on_time(color: String) -> void:
 		GameLog.RED
 	)
 	_update_status()
-	
+
 # --------------------------------------------------
 # INPUT / SELECTION
 # --------------------------------------------------
@@ -332,6 +457,7 @@ func restart() -> void:
 		_leave_match()
 		return
 
+	skip_intro_once = true
 	get_tree().reload_current_scene()
 
 
@@ -341,6 +467,9 @@ func _leave_match() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not _game_started:
+		return
+
 	if over or not pending_promo.is_empty() or awaiting_result:
 		return
 
@@ -515,7 +644,7 @@ func _on_move_rejected() -> void:
 func _on_opponent_left() -> void:
 	if disconnected or over:
 		return
-	
+
 	disconnected = true
 	_state.over = true
 	awaiting_result = false
@@ -523,6 +652,11 @@ func _on_opponent_left() -> void:
 	_promotion_ui.hide()
 	_deselect()
 	_clock.stop()
+
+	# Don't leave the player stuck behind the intro guide.
+	if _guide != null and is_instance_valid(_guide):
+		_guide.close()
+
 	_log("\nOpponent disconnected.", GameLog.RED)
 	NetworkManager.shutdown()
 	_update_status()
@@ -582,6 +716,9 @@ func _update_status() -> void:
 	if over:
 		status.text = "%s wins!" % _current_player_name()
 		return
+	if not _game_started:
+		status.text = "Waiting for players to be ready..."
+		return
 
 	var status_text := "%s's turn (%s)" % [
 		_current_player_name(),
@@ -603,7 +740,7 @@ func _update_status() -> void:
 func play_button_audio() -> void:
 	if button_audio:
 		button_audio.play()
-		
+
 func open_preset_picker() -> void:
 	if _online:
 		return

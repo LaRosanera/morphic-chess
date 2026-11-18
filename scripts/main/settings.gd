@@ -274,6 +274,7 @@ func _build_rules_list() -> void:
 			"Can jump: %s" % str(rule.jumps),
 			"Can promote: %s" % str(rule.promotes),
 			"Movement directions: %s" % str(rule.directions),
+			"Leap directions: %s" % str(rule.leap_directions),
 			"Move-only directions: %s" % str(rule.move_only_directions),
 			"Capture-only directions: %s" % str(rule.capture_only_directions),
 		])

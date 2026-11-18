@@ -2,12 +2,12 @@
   "name": "Royal Rumble",
   "board": [
     "rnbqkbnr",
-    "p.p.p.p.",
+    "pqpqpqpq",
     "........",
-    "...a....",
-    "....A...",
+    "...aa...",
+    "...AA...",
     "........",
-    "P.P.P.P.",
+    "PQPQPQPQ",
     "RNBQKBNR"
   ]
 }

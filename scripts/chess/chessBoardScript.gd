@@ -104,6 +104,10 @@ var game_types: Dictionary:
 	get:
 		return _state.game_types if _state != null else {}
 
+var promo_pool: Array[String]:
+	get:
+		return _state.promo_pool if _state != null else []
+
 var turn: String:
 	get:
 		return _state.turn if _state != null else "white"
@@ -172,7 +176,6 @@ func _ready() -> void:
 
 	RuleSetup.register_custom($Rules)
 	_state.rules = RuleSetup.collect($Rules)
-	_state.castle_types = RuleSetup.apply_seeded(_state.rules, rng, _log_writer)
 
 	_spawner = PieceSpawner.new(
 		white_piece_scene,
@@ -192,6 +195,41 @@ func _ready() -> void:
 		current_preset = preset_path
 
 	_pending_name = _spawner.spawn_all(current_preset)
+
+	var has_promoter := false
+	for piece in _state.grid.values():
+		var rule: MoveRule = _state.rules.get(MoveRule.type_of(piece))
+		if rule != null and rule.promotes:
+			has_promoter = true
+			break
+
+	if has_promoter:
+		_state.promo_pool = RuleSetup.pick_promo_pool(_state.rules, game_seed)
+	else:
+		_state.promo_pool = []
+
+	var allowed := {}
+	for color in _state.game_types:
+		for t in _state.game_types[color]:
+			allowed[t] = true
+	for t in _state.promo_pool:
+		allowed[t] = true
+
+	_state.castle_types = RuleSetup.apply_seeded(
+		_state.rules,
+		rng,
+		_log_writer,
+		allowed
+	)
+	if has_promoter:
+		var line := "Promotion options: %s" % ", ".join(
+			_state.promo_pool.map(func(t): return t.capitalize())
+		)
+		RuleSetup.changes.append(line)
+		_log(line, GameLog.GOLD)
+	else:
+		RuleSetup.changes.append("Promotion disabled (no pawns on the board)")
+		_log("No pawns on the board: promotion disabled", GameLog.GOLD)
 
 	_promotion_ui.chosen.connect(_on_promo_chosen)
 

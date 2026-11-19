@@ -17,6 +17,10 @@ var rules := {}  # piece type -> MoveRule node
 ## Piece types allowed to castle with the king. Empty = castling disabled.
 var castle_types := {}
 
+## Piece types pawns may promote to this game. Empty = promotion disabled
+## this game.
+var promo_pool: Array[String] = []
+
 ## Set by move_piece(): {"rook_from", "rook_to"} if the last move was a castle.
 var last_castle := {}
 
@@ -66,25 +70,14 @@ func promotes_on(p: AnimatedSprite2D, to: Vector2i) -> bool:
 	return rule.promotes and to.y == far_rank and not captures_king
 
 
-func promo_options(color: String) -> Array[String]:
+func promo_options(_color: String) -> Array[String]:
 	var options: Array[String] = []
-	var available: Dictionary = game_types[color]
 
 	for piece_type in PROMO_ORDER:
-		if available.has(piece_type) and rules.has(piece_type):
+		if promo_pool.has(piece_type) and rules.has(piece_type):
 			options.append(piece_type)
-
-	# Include other registered custom types not in PROMO_ORDER.
-	for key in available:
-		var piece_type := String(key)
-
-		if piece_type == "pawn" or piece_type == "king":
-			continue
-
-		if not rules.has(piece_type):
-			continue
-
-		if not options.has(piece_type):
+	for piece_type in promo_pool:
+		if rules.has(piece_type) and not options.has(piece_type):
 			options.append(piece_type)
 
 	return options

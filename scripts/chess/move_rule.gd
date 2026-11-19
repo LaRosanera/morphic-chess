@@ -30,6 +30,11 @@ const SIZE := 8
 ## 1 = single step / jump, 7 = slides across the board.
 @export var max_range := 1
 
+## How many times a leap repeats. 1 = single jump (normal leaper).
+## Higher = rider: the piece hops again from each landing square.
+## Landing on a piece stops the ride (capture if enemy) unless `jumps` is true.
+@export var leap_range := 1
+
 ## Range for move_only_directions on the piece's first move.
 ## Used for the pawn double step. 0 = no bonus.
 @export var first_move_range := 0
@@ -41,6 +46,40 @@ const SIZE := 8
 
 ## true = piece is replaced by a chosen piece on reaching the far rank.
 @export var promotes := false
+
+var _base: Dictionary
+
+
+func snapshot() -> void:
+	if not _base.is_empty():
+		return
+
+	_base = {
+		"directions": directions.duplicate(),
+		"move_only": move_only_directions.duplicate(),
+		"capture_only": capture_only_directions.duplicate(),
+		"leap": leap_directions.duplicate(),
+		"max_range": max_range,
+		"leap_range": leap_range,
+		"first_move_range": first_move_range,
+		"jumps": jumps,
+		"promotes": promotes,
+	}
+
+
+func restore() -> void:
+	if _base.is_empty():
+		return
+
+	directions.assign(_base["directions"])
+	move_only_directions.assign(_base["move_only"])
+	capture_only_directions.assign(_base["capture_only"])
+	leap_directions.assign(_base["leap"])
+	max_range = _base["max_range"]
+	leap_range = _base["leap_range"]
+	first_move_range = _base["first_move_range"]
+	jumps = _base["jumps"]
+	promotes = _base["promotes"]
 
 
 static func color_of(piece: AnimatedSprite2D) -> String:
@@ -110,12 +149,11 @@ func get_targets(
 			board,
 			from,
 			Vector2i(d.x, d.y * flip),
-			1,
+			leap_range,
 			true,
 			true,
 			color,
-			out,
-			true
+			out
 		)
 
 	return out
@@ -129,8 +167,7 @@ func _walk(
 	can_move: bool,
 	can_capture: bool,
 	color: String,
-	out: Array[Vector2i],
-	leap: bool = false
+	out: Array[Vector2i]
 ) -> void:
 	var cell := from
 
@@ -144,7 +181,7 @@ func _walk(
 			if can_capture and color_of(board[cell]) != color:
 				out.append(cell)
 
-			if not (jumps or leap):
+			if not jumps:
 				return
 
 		elif can_move:

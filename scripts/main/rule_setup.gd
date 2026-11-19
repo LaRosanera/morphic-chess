@@ -8,6 +8,14 @@ extends RefCounted
 ## All randomness happens in apply_seeded(), once, before any move. Every
 ## peer runs it in the same order with the same seed, so rules stay in sync.
 
+static var changes: Array[String] = []
+
+
+static func _say(game_log: GameLog, text: String) -> void:
+	changes.append(text)
+	game_log.write(text, GameLog.GOLD)
+
+
 const ORTHO: Array[Vector2i] = [
 	Vector2i(1, 0),
 	Vector2i(-1, 0),
@@ -50,6 +58,44 @@ const ALFIL: Array[Vector2i] = [
 	Vector2i(-2, 2),
 	Vector2i(-2, -2),
 ]
+
+const ZEBRA: Array[Vector2i] = [
+	Vector2i(2, 3),
+	Vector2i(3, 2),
+	Vector2i(-2, 3),
+	Vector2i(-3, 2),
+	Vector2i(2, -3),
+	Vector2i(3, -2),
+	Vector2i(-2, -3),
+	Vector2i(-3, -2),
+]
+
+const DABBABA: Array[Vector2i] = [
+	Vector2i(2, 0),
+	Vector2i(-2, 0),
+	Vector2i(0, 2),
+	Vector2i(0, -2),
+]
+
+const MUTATIONS: Array[String] = [
+	"range",
+	"pawn_first",
+	"jump",
+	"stepper",
+	"side_capture",
+	"borrow",
+	"extra_leap",
+	"leap_range",
+]
+
+
+static func _add_unique(
+	target: Array[Vector2i],
+	offsets: Array[Vector2i]
+) -> void:
+	for offset in offsets:
+		if not target.has(offset):
+			target.append(offset)
 
 
 static func register_custom(rules_node: Node) -> void:
@@ -103,102 +149,281 @@ static func collect(rules_node: Node) -> Dictionary:
 	for child in rules_node.get_children():
 		if child is MoveRule:
 			var rule := child as MoveRule
+			rule.snapshot()
 			rules[rule.piece_type] = rule
 
 	return rules
 
 
+static func _sub_rng(base_seed: int, tag: String) -> RandomNumberGenerator:
+	var sub_rng := RandomNumberGenerator.new()
+	sub_rng.seed = hash("%d:%s" % [base_seed, tag])
+	return sub_rng
+
+
+## Picks from `pool`, keeping only types in `allowed`. Returns "" if none.
+static func _pick(
+	pool: Array,
+	allowed: Dictionary,
+	r: RandomNumberGenerator
+) -> String:
+	var valid: Array = []
+	for t in pool:
+		if allowed.has(t):
+			valid.append(t)
+	if valid.is_empty():
+		return ""
+	return valid[r.randi_range(0, valid.size() - 1)]
+
+
+## Picks a random subset of all piece types that pawns may promote to.
+static func pick_promo_pool(rules: Dictionary, base_seed: int) -> Array[String]:
+	var r := _sub_rng(base_seed, "promo_pool")
+
+	# Sorted so the order never depends on dictionary insertion order.
+	var candidates: Array[String] = []
+	for key in rules:
+		var t := String(key)
+		if t != "pawn" and t != "king":
+			candidates.append(t)
+	candidates.sort()
+
+	# Seeded Fisher-Yates (never Array.shuffle()).
+	for i in range(candidates.size() - 1, 0, -1):
+		var j := r.randi_range(0, i)
+		var tmp := candidates[i]
+		candidates[i] = candidates[j]
+		candidates[j] = tmp
+
+	var count := mini(r.randi_range(2, 6), candidates.size())
+	var pool: Array[String] = []
+	for k in range(count):
+		pool.append(candidates[k])
+	return pool
+
+
 static func apply_seeded(
 	rules: Dictionary,
 	rng: RandomNumberGenerator,
+	game_log: GameLog,
+	allowed: Dictionary
+) -> Dictionary:
+	for rule in rules.values():
+		(rule as MoveRule).restore()
+
+	changes.clear()
+
+	var base_seed := rng.seed
+	var select := _sub_rng(base_seed, "select")
+	var order: Array[String] = MUTATIONS.duplicate()
+	for i in range(order.size() - 1, 0, -1):
+		var j := select.randi_range(0, i)
+		var tmp := order[i]
+		order[i] = order[j]
+		order[j] = tmp
+
+	var count := mini(select.randi_range(3, 6), order.size())
+	for k in range(count):
+		var tag := order[k]
+		_run_mutation(tag, rules, _sub_rng(base_seed, tag), game_log, allowed)
+
+	return _apply_castling(rules, _sub_rng(base_seed, "castling"), game_log)
+
+
+static func _run_mutation(
+	tag: String,
+	rules: Dictionary,
+	r: RandomNumberGenerator,
+	game_log: GameLog,
+	allowed: Dictionary
+) -> void:
+	match tag:
+		"range":
+			_mut_range(rules, r, game_log, allowed)
+		"pawn_first":
+			_mut_pawn_first(rules, r, game_log, allowed)
+		"jump":
+			_mut_jump(rules, r, game_log, allowed)
+		"stepper":
+			_mut_stepper(rules, r, game_log, allowed)
+		"side_capture":
+			_mut_side_capture(rules, r, game_log, allowed)
+		"borrow":
+			_mut_borrow(rules, r, game_log, allowed)
+		"extra_leap":
+			_mut_extra_leap(rules, r, game_log, allowed)
+		"leap_range":
+			_mut_leap_range(rules, r, game_log, allowed)
+
+
+static func _mut_range(
+	rules: Dictionary,
+	r: RandomNumberGenerator,
+	game_log: GameLog,
+	allowed: Dictionary
+) -> void:
+	var piece := _pick(["rook", "bishop", "queen", "king"], allowed, r)
+	if piece == "" or not rules.has(piece):
+		return
+	var value := r.randi_range(2, 3) if piece == "king" else r.randi_range(2, 7)
+	(rules[piece] as MoveRule).max_range = value
+	_say(game_log, "%s range: %d" % [piece.capitalize(), value])
+
+
+static func _mut_pawn_first(
+	rules: Dictionary,
+	r: RandomNumberGenerator,
+	game_log: GameLog,
+	allowed: Dictionary
+) -> void:
+	if not allowed.has("pawn"):
+		return
+	var value := r.randi_range(2, 3)
+	if rules.has("pawn"):
+		(rules["pawn"] as MoveRule).first_move_range = value
+		_say(game_log, "Pawn first move range: %d" % value)
+
+
+static func _mut_jump(
+	rules: Dictionary,
+	r: RandomNumberGenerator,
+	game_log: GameLog,
+	allowed: Dictionary
+) -> void:
+	var piece := _pick(["rook", "bishop"], allowed, r)
+	if piece == "" or not rules.has(piece):
+		return
+	(rules[piece] as MoveRule).jumps = true
+	_say(game_log, "%s can jump over pieces!" % piece.capitalize())
+
+
+static func _mut_stepper(
+	rules: Dictionary,
+	r: RandomNumberGenerator,
+	game_log: GameLog,
+	allowed: Dictionary
+) -> void:
+	var piece := _pick(["knight", "bishop", "rook"], allowed, r)
+	if piece == "" or not rules.has(piece):
+		return
+
+	var rule: MoveRule = rules[piece]
+	match piece:
+		"rook":
+			_add_unique(rule.leap_directions, DIAG)
+		"bishop":
+			_add_unique(rule.leap_directions, ORTHO)
+		_:
+			_add_unique(rule.leap_directions, ORTHO)
+			_add_unique(rule.leap_directions, DIAG)
+	_say(game_log, "%s can also step one square" % piece.capitalize())
+
+
+static func _mut_side_capture(
+	rules: Dictionary,
+	r: RandomNumberGenerator,
+	game_log: GameLog,
+	allowed: Dictionary
+) -> void:
+	if not allowed.has("pawn"):
+		return
+	r.randf()
+	if rules.has("pawn"):
+		var rule: MoveRule = rules["pawn"]
+		_add_unique(
+			rule.capture_only_directions,
+			[Vector2i(1, 0), Vector2i(-1, 0)]
+		)
+		_say(game_log, "Pawns can capture sideways")
+
+
+static func _mut_borrow(
+	rules: Dictionary,
+	r: RandomNumberGenerator,
+	game_log: GameLog,
+	allowed: Dictionary
+) -> void:
+	var piece := _pick(["bishop", "rook", "queen", "king"], allowed, r)
+	if piece == "" or not rules.has(piece):
+		return
+	var move_name: String
+	var offsets: Array[Vector2i]
+	match r.randi_range(0, 2):
+		0:
+			move_name = "Knight"
+			offsets = KNIGHT
+		1:
+			move_name = "Camel"
+			offsets = CAMEL
+		_:
+			move_name = "Zebra"
+			offsets = ZEBRA
+
+	_add_unique((rules[piece] as MoveRule).leap_directions, offsets)
+	_say(game_log, "%s also moves like a %s" % [piece.capitalize(), move_name])
+
+
+static func _mut_extra_leap(
+	rules: Dictionary,
+	r: RandomNumberGenerator,
+	game_log: GameLog,
+	allowed: Dictionary
+) -> void:
+	var piece := _pick(["pawn", "knight", "man", "minister"], allowed, r)
+	if piece == "" or not rules.has(piece):
+		return
+	var move_name: String
+	var offsets: Array[Vector2i]
+	if r.randi_range(0, 1) == 0:
+		move_name = "Alfil"
+		offsets = ALFIL
+	else:
+		move_name = "Dabbaba"
+		offsets = DABBABA
+
+	_add_unique((rules[piece] as MoveRule).leap_directions, offsets)
+	_say(game_log, "%s also leaps like an %s" % [piece.capitalize(), move_name])
+
+
+static func _mut_leap_range(
+	rules: Dictionary,
+	r: RandomNumberGenerator,
+	game_log: GameLog,
+	allowed: Dictionary
+) -> void:
+	var piece := _pick(["elephant", "camel", "princess", "empress"], allowed, r)
+	if piece == "" or not rules.has(piece):
+		return
+	var value := r.randi_range(2, 4)
+	(rules[piece] as MoveRule).leap_range = value
+	_say(game_log, "%s leap range: %d" % [piece.capitalize(), value])
+
+
+static func _apply_castling(
+	rules: Dictionary,
+	r: RandomNumberGenerator,
 	game_log: GameLog
 ) -> Dictionary:
-	# FEATURE 1: Randomize a standard sliding piece's range.
-	var sliding_pieces := ["rook", "bishop", "queen", "king", "elephant"]
-	var chosen_piece: String = sliding_pieces[
-		rng.randi_range(0, sliding_pieces.size() - 1)
-	]
-
-	if rules.has(chosen_piece):
-		var rule: MoveRule = rules[chosen_piece]
-		rule.max_range = rng.randi_range(2, 7)
-
-		game_log.write(
-			"%s range: %d" % [chosen_piece.capitalize(), rule.max_range],
-			GameLog.GOLD
-		)
-
-	# FEATURE 2: Randomize the pawn's first move distance.
-	if rules.has("pawn"):
-		var pawn_rule: MoveRule = rules["pawn"]
-		pawn_rule.first_move_range = rng.randi_range(2, 3)
-
-		game_log.write(
-			"Pawn first move range: %d" % pawn_rule.first_move_range,
-			GameLog.GOLD
-		)
-
-	# FEATURE 3: Give a standard sliding piece the ability to jump.
-	var jump_pieces := ["rook", "bishop"]
-	var jump_piece: String = jump_pieces[
-		rng.randi_range(0, jump_pieces.size() - 1)
-	]
-
-	if rules.has(jump_piece):
-		var jump_rule: MoveRule = rules[jump_piece]
-		jump_rule.jumps = true
-
-		game_log.write(
-			"%s can jump over pieces!" % jump_piece.capitalize(),
-			GameLog.GOLD
-		)
-		# FEATURE 4: a random piece can also step one square any direction.
-	var stepper_pool := ["knight", "bishop", "rook"]
-	var stepper: String = stepper_pool[rng.randi_range(0, stepper_pool.size() - 1)]
-	var step_roll := rng.randf()
-
-	if step_roll < 0.5 and rules.has(stepper):
-		var step_rule: MoveRule = rules[stepper]
-		step_rule.leap_directions.append_array(ORTHO)
-		step_rule.leap_directions.append_array(DIAG)
-		game_log.write(
-			"%s can also step one square any direction" % stepper.capitalize(),
-			GameLog.GOLD
-		)
-
-	# FEATURE 5: pawns can capture sideways.
-	var side_roll := rng.randf()
-
-	if side_roll < 0.4 and rules.has("pawn"):
-		var side_rule: MoveRule = rules["pawn"]
-		side_rule.capture_only_directions.append(Vector2i(1, 0))
-		side_rule.capture_only_directions.append(Vector2i(-1, 0))
-		game_log.write("Pawns can capture sideways", GameLog.GOLD)
-
-	# FEATURE 6: castling. 15% off, 50% rook + empress, 35% those plus one
-	# random extra piece type.
 	var extra_pool := [
 		"bishop", "knight", "queen", "amazon", "princess",
 		"camel", "elephant", "minister", "man"
 	]
-	var extra: String = extra_pool[rng.randi_range(0, extra_pool.size() - 1)]
-	var castle_roll := rng.randi_range(0, 99)
+	var extra: String = extra_pool[r.randi_range(0, extra_pool.size() - 1)]
+	var castle_roll := r.randi_range(0, 99)
 	var castle_types := {}
 
 	if castle_roll < 15:
-		game_log.write("Castling is disabled", GameLog.GOLD)
-	else:
-		for t in ["rook", "empress"]:
-			if rules.has(t):
-				castle_types[t] = true
+		_say(game_log, "Castling is disabled")
+		return castle_types
 
-		if castle_roll >= 65 and rules.has(extra):
-			castle_types[extra] = true
+	for piece in ["rook", "empress"]:
+		if rules.has(piece):
+			castle_types[piece] = true
+	if castle_roll >= 65 and rules.has(extra):
+		castle_types[extra] = true
 
-		var names: Array[String] = []
-		for t in castle_types:
-			names.append(String(t).capitalize())
-
-		game_log.write("Castling: king + %s" % " / ".join(names), GameLog.GOLD)
-
+	var names: Array[String] = []
+	for piece in castle_types:
+		names.append(String(piece).capitalize())
+	_say(game_log, "Castling: king + %s" % " / ".join(names))
 	return castle_types

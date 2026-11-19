@@ -22,6 +22,8 @@ const CAPTURE_COLOR := Color(0.9, 0.15, 0.15, 0.6)
 @onready var obstacles_check: CheckButton = %ObstaclesCheck
 @onready var first_move_check: CheckButton = %FirstMoveCheck
 @onready var info: RichTextLabel = %Info
+@onready var tabs: TabContainer = %Tabs
+@onready var changes_text: RichTextLabel = %ChangesText
 @onready var close_button: Button = %Close
 @onready var button_audio: AudioStreamPlayer2D = %ButtonAudio
 
@@ -61,6 +63,10 @@ func _ready() -> void:
 		_redraw()
 	)
 
+	tabs.tab_changed.connect(func(_tab: int) -> void:
+		_play_button_audio()
+	)
+
 
 # --------------------------------------------------
 # OPEN / CLOSE
@@ -74,6 +80,7 @@ func open(board: Node2D = null) -> void:
 	_ready_colors.clear()
 
 	_build_list()
+	tabs.current_tab = 0
 	visible = true
 	close_button.grab_focus()
 
@@ -95,6 +102,7 @@ func open_intro(board: Node2D = null, colors: Array = ["white", "black"]) -> voi
 			_ready_colors[normalized] = false
 
 	_build_list()
+	tabs.current_tab = 0
 	visible = true
 	_update_ready_ui()
 	close_button.grab_focus()
@@ -167,11 +175,28 @@ func _play_button_audio() -> void:
 # PIECE LIST
 # --------------------------------------------------
 
+func _available_types() -> Dictionary:
+	var available := {}
+	if not is_instance_valid(chess_board):
+		return available
+	for color in chess_board.game_types:
+		for piece_type in chess_board.game_types[color]:
+			available[piece_type] = true
+	for piece_type in chess_board.promo_pool:
+		available[piece_type] = true
+	return available
+
+
 func _build_list() -> void:
 	piece_list.clear()
 	_types.clear()
+	_update_changes_tab()
+
+	var available_types := _available_types()
 
 	for piece_type in _rules:
+		if not available_types.is_empty() and not available_types.has(piece_type):
+			continue
 		_types.append(str(piece_type))
 		var icon := _piece_texture(_white_frames, "white_%s" % piece_type)
 		piece_list.add_item(str(piece_type).capitalize(), icon)
@@ -183,6 +208,15 @@ func _build_list() -> void:
 
 	piece_list.select(0)
 	_show_piece(0)
+
+
+func _update_changes_tab() -> void:
+	var lines: Array[String] = []
+	for entry in RuleSetup.changes:
+		lines.append("[color=gold]•[/color] %s" % entry)
+	if lines.is_empty():
+		lines.append("No changes this game.")
+	changes_text.text = "\n".join(lines)
 
 
 func _on_piece_selected(index: int) -> void:

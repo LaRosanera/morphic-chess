@@ -79,52 +79,68 @@ custom_minimum_size = Vector2(120, 40)
 layout_mode = 2
 text = "READY"
 
-[node name="Body" type="HBoxContainer" parent="Center/Panel/Margin/Main" unique_id=1851759161]
+[node name="Tabs" type="TabContainer" parent="Center/Panel/Margin/Main" unique_id=1851759161]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Guide" type="HBoxContainer" parent="Center/Panel/Margin/Main/Tabs" unique_id=1851759162]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="PieceList" type="ItemList" parent="Center/Panel/Margin/Main/Body" unique_id=2003988965]
+[node name="PieceList" type="ItemList" parent="Center/Panel/Margin/Main/Tabs/Guide" unique_id=2003988965]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 fixed_icon_size = Vector2i(32, 32)
 
-[node name="BoardColumn" type="VBoxContainer" parent="Center/Panel/Margin/Main/Body" unique_id=1177708228]
+[node name="BoardColumn" type="VBoxContainer" parent="Center/Panel/Margin/Main/Tabs/Guide" unique_id=1177708228]
 layout_mode = 2
 
-[node name="BoardHolder" type="Control" parent="Center/Panel/Margin/Main/Body/BoardColumn" unique_id=410227384]
+[node name="BoardHolder" type="Control" parent="Center/Panel/Margin/Main/Tabs/Guide/BoardColumn" unique_id=410227384]
 custom_minimum_size = Vector2(270, 270)
 clip_contents = true
 layout_mode = 2
 
-[node name="Board" type="Node2D" parent="Center/Panel/Margin/Main/Body/BoardColumn/BoardHolder" unique_id=2072312257]
+[node name="Board" type="Node2D" parent="Center/Panel/Margin/Main/Tabs/Guide/BoardColumn/BoardHolder" unique_id=2072312257]
 scale = Vector2(0.6, 0.6)
 
-[node name="Tiles" type="TileMapLayer" parent="Center/Panel/Margin/Main/Body/BoardColumn/BoardHolder/Board" unique_id=154797648]
+[node name="Tiles" type="TileMapLayer" parent="Center/Panel/Margin/Main/Tabs/Guide/BoardColumn/BoardHolder/Board" unique_id=154797648]
 unique_name_in_owner = true
 tile_set = SubResource("TileSet_guide")
 
-[node name="Highlights" type="Node2D" parent="Center/Panel/Margin/Main/Body/BoardColumn/BoardHolder/Board" unique_id=1214533860]
+[node name="Highlights" type="Node2D" parent="Center/Panel/Margin/Main/Tabs/Guide/BoardColumn/BoardHolder/Board" unique_id=1214533860]
 unique_name_in_owner = true
 
-[node name="Pieces" type="Node2D" parent="Center/Panel/Margin/Main/Body/BoardColumn/BoardHolder/Board" unique_id=739044865]
+[node name="Pieces" type="Node2D" parent="Center/Panel/Margin/Main/Tabs/Guide/BoardColumn/BoardHolder/Board" unique_id=739044865]
 unique_name_in_owner = true
 
-[node name="ObstaclesCheck" type="CheckButton" parent="Center/Panel/Margin/Main/Body/BoardColumn" unique_id=16900319]
+[node name="ObstaclesCheck" type="CheckButton" parent="Center/Panel/Margin/Main/Tabs/Guide/BoardColumn" unique_id=16900319]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Pieces in the way"
 
-[node name="FirstMoveCheck" type="CheckButton" parent="Center/Panel/Margin/Main/Body/BoardColumn" unique_id=1533909392]
+[node name="FirstMoveCheck" type="CheckButton" parent="Center/Panel/Margin/Main/Tabs/Guide/BoardColumn" unique_id=1533909392]
 unique_name_in_owner = true
 layout_mode = 2
 text = "First move"
 
-[node name="Info" type="RichTextLabel" parent="Center/Panel/Margin/Main/Body" unique_id=1322430198]
+[node name="Info" type="RichTextLabel" parent="Center/Panel/Margin/Main/Tabs/Guide" unique_id=1322430198]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(220, 0)
 layout_mode = 2
 size_flags_horizontal = 3
+bbcode_enabled = true
+
+[node name="Changes" type="VBoxContainer" parent="Center/Panel/Margin/Main/Tabs" unique_id=1851759163]
+layout_mode = 2
+
+[node name="ChangesText" type="RichTextLabel" parent="Center/Panel/Margin/Main/Tabs/Changes" unique_id=1851759164]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 270)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 bbcode_enabled = true
 
 [node name="ButtonAudio" type="AudioStreamPlayer2D" parent="." unique_id=751062643]

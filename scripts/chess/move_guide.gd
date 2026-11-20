@@ -50,7 +50,6 @@ func _ready() -> void:
 	_black_frames = _frames_from(BLACK_PIECE_SCENE)
 	_paint_board()
 
-	close_button.pressed.connect(_on_close_pressed)
 	piece_list.item_selected.connect(_on_piece_selected)
 
 	obstacles_check.toggled.connect(func(_on: bool) -> void:

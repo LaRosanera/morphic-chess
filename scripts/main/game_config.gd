@@ -11,6 +11,7 @@ var flipped := false  # draw the board from black's side
 var game_seed := 0
 var initial_time := 0
 var increment := 0
+var board_data: Dictionary = {}
 
 static func from_tree(tree: SceneTree) -> GameConfig:
 	var data: Dictionary = tree.get_meta("chess_config", {})
@@ -23,6 +24,9 @@ static func from_tree(tree: SceneTree) -> GameConfig:
 	config.flipped = bool(data.get("board_flipped", false))
 	config.initial_time = int(data.get("initial_time_seconds", 0))
 	config.increment = int(data.get("increment_seconds", 0))
+	var board: Variant = data.get("board_data", {})
+	if board is Dictionary:
+		config.board_data = board
 	if config.online:
 		# Both peers must build the same game: always use the lobby's seed.
 		config.game_seed = int(data.get("seed", 0))

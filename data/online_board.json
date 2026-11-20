@@ -1,0 +1,16 @@
+{
+  "in-game": false,
+  "name": "Classic",
+  "Seed": 12345,
+  "color": null,
+  "board": [
+	"rbnqknbr",
+	"pppppppp",
+	"........",
+	"........",
+	"........",
+	"........",
+	"PPPPPPPP",
+    "RBNQKNBR"
+  ]
+}

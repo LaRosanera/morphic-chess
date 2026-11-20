@@ -1,4 +1,3 @@
-
 class_name PromotionUI
 extends RefCounted
 
@@ -53,7 +52,7 @@ func show_options(options: Array[String], is_white: bool = true) -> void:
 
 	for piece_type in options:
 		var anim_name := color_prefix + piece_type.to_lower()
-		var button := _create_piece_button(piece_type, frames, anim_name)
+		var button := _create_piece_button(piece_type, frames, anim_name, is_white)
 		_grid.add_child(button)
 
 	_picker.show()
@@ -67,13 +66,33 @@ func hide() -> void:
 func _create_piece_button(
 	piece_type: String,
 	frames: SpriteFrames,
-	anim_name: String
+	anim_name: String,
+	is_white: bool
 ) -> Button:
 	var button := Button.new()
 	button.name = piece_type.capitalize()
 	button.custom_minimum_size = BUTTON_SIZE
 	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	button.pressed.connect(_on_pressed.bind(piece_type))
+
+	# Apply white background and black text ONLY for black-piece promotion.
+	# Duplicate existing theme styles so borders, margins, and other styling
+	# are preserved.
+	if not is_white:
+		for state in ["normal", "hover", "pressed", "disabled"]:
+			var original_style: StyleBox = button.get_theme_stylebox(state)
+			var style := original_style.duplicate() as StyleBoxFlat
+
+			if style != null:
+				style.bg_color = Color.WHITE
+				button.add_theme_stylebox_override(state, style)
+
+		button.add_theme_color_override("font_color", Color.BLACK)
+		button.add_theme_color_override("font_hover_color", Color.BLACK)
+		button.add_theme_color_override("font_pressed_color", Color.BLACK)
+		button.add_theme_color_override("font_hover_pressed_color", Color.BLACK)
+		button.add_theme_color_override("font_focus_color", Color.BLACK)
+		button.add_theme_color_override("font_disabled_color", Color.BLACK)
 
 	var vbox := VBoxContainer.new()
 	vbox.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -91,8 +110,10 @@ func _create_piece_button(
 
 	if frames != null and frames.has_animation(anim_name):
 		icon.texture = frames.get_frame_texture(anim_name, 0)
+
 	if piece_type.to_lower() in ["camel", "minister", "man"]:
 		icon.flip_v = true
+
 	vbox.add_child(icon)
 
 	# Piece name.
@@ -100,6 +121,10 @@ func _create_piece_button(
 	label.text = piece_type.capitalize()
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	if not is_white:
+		label.add_theme_color_override("font_color", Color.BLACK)
+
 	vbox.add_child(label)
 
 	return button

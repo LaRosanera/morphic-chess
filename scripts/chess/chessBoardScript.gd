@@ -88,7 +88,6 @@ var time_expired := false
 var _guide: Control
 var _game_started := false
 var _ready_colors := {"white": false, "black": false}
-var _ready_resend := 0.0
 
 # Compatibility properties: existing scene scripts/settings can continue
 # reading the names exposed by the previous chessBoardScript.gd.
@@ -187,14 +186,22 @@ func _ready() -> void:
 	var presets := list_presets()
 	current_preset = ""
 
-	if not presets.is_empty():
+	if not _online and not presets.is_empty():
 		current_preset = presets[rng.randi_range(0, presets.size() - 1)]
 
 	# A manually picked file overrides the random choice (offline only).
 	if not _online and preset_path != "":
 		current_preset = preset_path
 
-	_pending_name = _spawner.spawn_all(current_preset)
+	if _online:
+		if not _spawner.spawn_from_data(_config.board_data):
+			push_error("Online match has invalid or missing board data.")
+			status.text = "ONLINE BOARD DATA IS INVALID"
+			NetworkManager.report_connection_lost("The room contains invalid board data")
+			return
+		_pending_name = _spawner.preset_name
+	else:
+		_pending_name = _spawner.spawn_all(current_preset)
 
 	var has_promoter := false
 	for piece in _state.grid.values():
@@ -233,11 +240,11 @@ func _ready() -> void:
 
 	_promotion_ui.chosen.connect(_on_promo_chosen)
 
-	# RPC node path must be identical on host and guest.
+	# Both boards validate moves through the shared room stream.
 	_online_sync = OnlineSync.new()
 	_online_sync.name = "OnlineSync"
 	add_child(_online_sync)
-	_online_sync.setup(_state, local_color)
+	_online_sync.setup(_state)
 	_online_sync.move_approved.connect(_apply_move)
 	_online_sync.move_rejected.connect(_on_move_rejected)
 
@@ -257,11 +264,13 @@ func _ready() -> void:
 			_update_status()
 		)
 
-		if not multiplayer.is_server():
+		if not NetworkManager.is_host:
 			_clock_synced = false
 			_clock.enabled = false  # until the host tells us
 			_clock.running = false
 			_clock_sync.ask_host()
+		else:
+			_clock_sync.broadcast()
 	_log("MORPHIC CHESS v0.1")
 	_log("------------------")
 	_log("No check rules. Capture the enemy king to win.")
@@ -272,6 +281,8 @@ func _ready() -> void:
 		_log("ONLINE MATCH: you are %s.\n" % local_color.capitalize(), GameLog.GOLD)
 		if not NetworkManager.opponent_left.is_connected(_on_opponent_left):
 			NetworkManager.opponent_left.connect(_on_opponent_left)
+		if not NetworkManager.room_updated.is_connected(_on_room_updated):
+			NetworkManager.room_updated.connect(_on_room_updated)
 
 		var restart_button := get_node_or_null("UI/Restart")
 		if restart_button is Button:
@@ -379,22 +390,21 @@ func _start_game() -> void:
 	_update_status()
 
 
-func _send_ready(is_reply: bool) -> void:
-	if multiplayer.has_multiplayer_peer():
-		_remote_ready.rpc(is_reply)
+func _send_ready(_is_reply: bool) -> void:
+	if not _online:
+		return
+
+	var role := "host" if NetworkManager.is_host else "guest"
+	NetworkManager.write(
+		"rooms/%s/ready/%s" % [NetworkManager.room_code, role],
+		true,
+		_on_ready_written
+	)
 
 
-@rpc("any_peer", "call_remote", "reliable")
-func _remote_ready(is_reply: bool) -> void:
-	var other := "black" if local_color == "white" else "white"
-	_ready_colors[other] = true
-
-	# We already started but the opponent is still waiting on us (their
-	# message to us arrived before our scene was ready): tell them again.
-	if _game_started and not is_reply:
-		_send_ready(true)
-
-	_check_start()
+func _on_ready_written(ok: bool, _code: int, _data: Variant) -> void:
+	if not ok:
+		NetworkManager.report_connection_lost("Could not save your ready status")
 
 
 # TIME
@@ -410,15 +420,6 @@ func _process(delta: float) -> void:
 		if _sync_retry >= 0.5:
 			_sync_retry = 0.0
 			_clock_sync.ask_host()
-
-	# Our READY click may arrive before the opponent's board exists, so
-	# keep re-sending it until the game starts.
-	if _online and not _game_started and _ready_colors[local_color]:
-		_ready_resend += delta
-		if _ready_resend >= 0.5:
-			_ready_resend = 0.0
-			_send_ready(false)
-
 
 func _build_clock_ui() -> void:
 	_clock_labels = {"white": white_clock, "black": black_clock}
@@ -452,7 +453,7 @@ func _update_clock_labels() -> void:
 
 func _on_clock_expired(color: String) -> void:
 	# Only the host (or an offline game) decides timeouts.
-	if _online and not multiplayer.is_server():
+	if _online and not NetworkManager.is_host:
 		return
 
 	if _online:
@@ -659,12 +660,10 @@ func _apply_move(from: Vector2i, to: Vector2i, promo: String) -> void:
 
 	if over:
 		_clock.stop()
-	elif not (_online and not multiplayer.is_server()):
-		_clock.switch_to(turn)
-	else:
+	elif not _online or NetworkManager.is_host:
 		_clock.switch_to(turn)
 
-	if _online and multiplayer.is_server():
+	if _online and NetworkManager.is_host:
 		_clock_sync.broadcast()
 
 	_update_status()
@@ -698,6 +697,21 @@ func _on_opponent_left() -> void:
 	_log("\nOpponent disconnected.", GameLog.RED)
 	NetworkManager.shutdown()
 	_update_status()
+
+
+func _on_room_updated(room: Dictionary) -> void:
+	if not _online or _game_started:
+		return
+
+	var ready: Variant = room.get("ready", {})
+	if not (ready is Dictionary):
+		return
+
+	var host_color := "white" if bool(room.get("host_is_white", true)) else "black"
+	var guest_color := "black" if host_color == "white" else "white"
+	_ready_colors[host_color] = _ready_colors[host_color] or bool(ready.get("host", false))
+	_ready_colors[guest_color] = _ready_colors[guest_color] or bool(ready.get("guest", false))
+	_check_start()
 
 
 # --------------------------------------------------

@@ -3,9 +3,9 @@ extends Control
 const TITLE_SCENE := "res://Scenes/Main/title_screen.tscn"
 const GAME_SCENE := "res://Scenes/Chess/chess_board.tscn"
 const NAME_MAX_LENGTH := 7
+const ONLINE_BOARD_PATH := "res://data/online_board.json"
 var DAILY_SEED_PATH := "res://data/daily_seed.json"
 var DAILY_SEED = JSON.parse_string(FileAccess.get_file_as_string(DAILY_SEED_PATH))
-const DEFAULT_PORT := 7777
 
 const TIME_OPTIONS := [
 	{"label": "Untimed", "seconds": 0, "increment": 0},
@@ -48,9 +48,8 @@ enum Role { HOST, JOIN }
 @onready var online_fields: Control = $Center/Panel/Margin/Content/OnlineFields
 @onready var online_name: LineEdit = $Center/Panel/Margin/Content/OnlineFields/NameField/OnlineName
 @onready var role_select: OptionButton = $Center/Panel/Margin/Content/OnlineFields/RoleField/RoleSelect
-@onready var ip_field: Control = $Center/Panel/Margin/Content/OnlineFields/IpField
-@onready var ip_input: LineEdit = $Center/Panel/Margin/Content/OnlineFields/IpField/IpInput
-@onready var port_input: LineEdit = $Center/Panel/Margin/Content/OnlineFields/PortField/PortInput
+@onready var room_code_field: Control = $Center/Panel/Margin/Content/OnlineFields/RoomCodeField
+@onready var room_code_input: LineEdit = $Center/Panel/Margin/Content/OnlineFields/RoomCodeField/RoomCodeInput
 
 @onready var summary: Label = $Center/Panel/Margin/Content/SummaryPanel/Summary
 @onready var status_label: Label = $Center/Panel/Margin/Content/StatusLabel
@@ -106,8 +105,7 @@ func _connect_signals() -> void:
 	online_tab.toggled.connect(func(_pressed: bool) -> void: _refresh_layout())
 	role_select.item_selected.connect(func(_i: int) -> void: _refresh_layout())
 	online_name.text_changed.connect(_update_summary)
-	ip_input.text_changed.connect(_update_summary)
-	port_input.text_changed.connect(_update_summary)
+	room_code_input.text_changed.connect(_update_summary)
 
 	start_button.pressed.connect(_start_game)
 	back_button.pressed.connect(_go_back)
@@ -115,6 +113,7 @@ func _connect_signals() -> void:
 	NetworkManager.opponent_connected.connect(_on_opponent_connected)
 	NetworkManager.match_ready.connect(_on_match_ready)
 	NetworkManager.connection_failed.connect(_on_connection_failed)
+	NetworkManager.room_created.connect(_on_room_created)
 
 # --------------------------------------------------
 # MODE / LAYOUT
@@ -144,7 +143,7 @@ func _refresh_layout() -> void:
 
 	# Online-only fields.
 	online_fields.visible = online
-	ip_field.visible = joining
+	room_code_field.visible = joining
 
 	# The host decides time control and seed; the joiner receives them.
 	time_field.visible = not joining
@@ -182,7 +181,7 @@ func _set_waiting(value: bool) -> void:
 
 	for widget in [
 		local_tab, online_tab, role_select, time_control,
-		online_name, ip_input, port_input, seed_input, daily_seed
+		online_name, room_code_input, seed_input, daily_seed
 	]:
 		if widget is LineEdit:
 			widget.editable = not value
@@ -253,18 +252,17 @@ func _update_summary(_value = null) -> void:
 
 func _online_summary() -> String:
 	var player := _player_name(online_name, "Player")
-	var port := port_input.text.strip_edges()
 
 	if _is_joining():
-		return "%s  >  %s:%s\nTime control, seed and colors are set by the host" % [
-			player, ip_input.text.strip_edges(), port
+		return "%s joining room %s\nTime control, seed, board and colors are set by the host" % [
+			player, room_code_input.text.strip_edges().to_upper()
 		]
 
 	var seed_text := "DAILY / %d" % DAILY_SEED if daily_seed.button_pressed \
 		else "CUSTOM / %s" % seed_input.text
 
-	return "%s hosting on port %s\n%s  |  SEED: %s  |  COLOR: RANDOM" % [
-		player, port, TIME_OPTIONS[time_control.selected].label, seed_text
+	return "%s hosting a room\n%s  |  SEED: %s  |  COLOR: RANDOM" % [
+		player, TIME_OPTIONS[time_control.selected].label, seed_text
 	]
 
 
@@ -309,8 +307,7 @@ func _restore_online_prefs() -> void:
 	var prefs: Dictionary = get_tree().get_meta("online_prefs", {})
 
 	online_name.text = prefs.get("name", "")
-	ip_input.text = prefs.get("ip", "")
-	port_input.text = str(prefs.get("port", DEFAULT_PORT))
+	room_code_input.text = prefs.get("room_code", "")
 	role_select.select(clampi(int(prefs.get("role", Role.HOST)), 0, 1))
 
 	if prefs.get("online", false):
@@ -320,8 +317,7 @@ func _restore_online_prefs() -> void:
 func _save_online_prefs() -> void:
 	get_tree().set_meta("online_prefs", {
 		"name": online_name.text,
-		"ip": ip_input.text,
-		"port": port_input.text,
+		"room_code": room_code_input.text,
 		"role": role_select.selected,
 		"online": _is_online()
 	})
@@ -430,12 +426,6 @@ func _unhandled_input(event: InputEvent) -> void:
 func _start_online() -> void:
 	_save_online_prefs()
 
-	var port_text := port_input.text.strip_edges()
-	if not port_text.is_valid_int() or int(port_text) < 1024 or int(port_text) > 65535:
-		status_label.text = "INVALID PORT / USE A NUMBER FROM 1024 TO 65535"
-		return
-
-	var port := int(port_text)
 	var player := _player_name(online_name, "Player")
 
 	if _is_hosting():
@@ -443,29 +433,47 @@ func _start_online() -> void:
 			status_label.text = "INVALID SEED / ENTER A VALID INTEGER"
 			return
 
-		var err := NetworkManager.host_game(port, player, _get_configuration())
-		if err != OK:
-			status_label.text = "COULD NOT HOST / PORT %d MAY ALREADY BE IN USE" % port
+		var board_data := _load_online_board_data()
+		if board_data.is_empty():
 			return
 
+		var config := _get_configuration()
+		config["board_data"] = board_data
 		_set_waiting(true)
-
-		var addresses := NetworkManager.local_addresses()
-		var share := ", ".join(addresses) if not addresses.is_empty() else "your IP"
-		status_label.text = "WAITING FOR OPPONENT ON PORT %d (UDP)\nLAN ADDRESS: %s  |  FOR INTERNET PLAY, SHARE YOUR PUBLIC IP AND FORWARD THE PORT" % [port, share]
+		status_label.text = "CREATING ROOM..."
+		NetworkManager.host_game(player, config)
 	else:
-		var address := ip_input.text.strip_edges()
-		if address.is_empty():
-			status_label.text = "ENTER THE HOST'S IP ADDRESS"
-			return
-
-		var err := NetworkManager.join_game(address, port, player)
-		if err != OK:
-			status_label.text = "COULD NOT START CONNECTION / CHECK THE ADDRESS"
+		var code := room_code_input.text.strip_edges().to_upper()
+		if code.is_empty():
+			status_label.text = "ENTER THE ROOM CODE"
 			return
 
 		_set_waiting(true)
-		status_label.text = "CONNECTING TO %s:%d ..." % [address, port]
+		status_label.text = "JOINING ROOM %s..." % code
+		NetworkManager.join_game(code, player)
+
+
+func _load_online_board_data() -> Dictionary:
+	if not FileAccess.file_exists(ONLINE_BOARD_PATH):
+		status_label.text = "ONLINE BOARD JSON NOT FOUND"
+		return {}
+
+	var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(ONLINE_BOARD_PATH))
+	if not (data is Dictionary):
+		status_label.text = "ONLINE BOARD JSON IS INVALID"
+		return {}
+
+	var board_data: Dictionary = data
+	if not PieceSpawner.is_valid_data(board_data):
+		status_label.text = "ONLINE BOARD JSON IS INVALID"
+		return {}
+
+	return board_data
+
+
+func _on_room_created(code: String) -> void:
+	if waiting:
+		status_label.text = "WAITING FOR OPPONENT\nROOM CODE: %s" % code
 
 
 func _on_opponent_connected() -> void:

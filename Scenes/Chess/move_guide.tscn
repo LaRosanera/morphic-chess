@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://o7g52ap8ycd4" path="res://scripts/chess/move_guide.gd" id="1_guide"]
 [ext_resource type="Texture2D" uid="uid://cdi0pqhp6mtp4" path="res://assets/board/chess_board_tiles.svg" id="2_tiles"]
 [ext_resource type="AudioStream" uid="uid://wto21j0bt3y" path="res://assets/audio/buttonclick.mp3" id="3_click"]
+[ext_resource type="Texture2D" uid="uid://8n476savhrbw" path="res://assets/icons/rose_vine.svg" id="4_64xm5"]
 [ext_resource type="Theme" uid="uid://bjpdwykllqede" path="res://assets/themes/settings_theme.tres" id="4_theme"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tiles"]
@@ -83,10 +84,12 @@ text = "READY"
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+current_tab = 0
 
 [node name="Guide" type="HBoxContainer" parent="Center/Panel/Margin/Main/Tabs" unique_id=1851759162]
 layout_mode = 2
 theme_override_constants/separation = 14
+metadata/_tab_index = 0
 
 [node name="PieceList" type="ItemList" parent="Center/Panel/Margin/Main/Tabs/Guide" unique_id=2003988965]
 unique_name_in_owner = true
@@ -132,8 +135,15 @@ layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
 
+[node name="RoseVine" type="Sprite2D" parent="Center/Panel/Margin/Main/Tabs/Guide" unique_id=1096357357]
+position = Vector2(612, 50.000008)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("4_64xm5")
+
 [node name="Changes" type="VBoxContainer" parent="Center/Panel/Margin/Main/Tabs" unique_id=1851759163]
+visible = false
 layout_mode = 2
+metadata/_tab_index = 1
 
 [node name="ChangesText" type="RichTextLabel" parent="Center/Panel/Margin/Main/Tabs/Changes" unique_id=1851759164]
 unique_name_in_owner = true
@@ -142,6 +152,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 bbcode_enabled = true
+
+[node name="RoseVine" type="Sprite2D" parent="Center/Panel/Margin/Main/Tabs/Changes" unique_id=1601831653]
+position = Vector2(612, 50.000008)
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("4_64xm5")
 
 [node name="ButtonAudio" type="AudioStreamPlayer2D" parent="." unique_id=751062643]
 unique_name_in_owner = true

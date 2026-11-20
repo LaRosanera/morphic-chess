@@ -94,20 +94,20 @@ func _spawn_from_file(path: String) -> bool:
 	if not (data is Dictionary):
 		return false
 
-	if not (data.get("board") is Array):
+	if not spawn_from_data(data):
+		return false
+	preset_name = str(data.get("name", path.get_file()))
+	return true
+
+
+func spawn_from_data(data: Dictionary) -> bool:
+	if not is_valid_data(data):
 		return false
 
 	var rows: Array = data["board"]
-
-	# Validate rows before spawning anything.
-	for y in range(mini(rows.size(), MoveRule.SIZE)):
-		if not (rows[y] is String):
-			return false
-
-	for y in range(mini(rows.size(), MoveRule.SIZE)):
+	for y in range(MoveRule.SIZE):
 		var row: String = rows[y]
-
-		for x in range(mini(row.length(), MoveRule.SIZE)):
+		for x in range(MoveRule.SIZE):
 			var ch := row.substr(x, 1)
 			var piece_type: String = LETTERS.get(ch.to_lower(), "")
 
@@ -126,5 +126,30 @@ func _spawn_from_file(path: String) -> bool:
 				if y != home_rank:
 					_state.grid[cell].set_meta("moved", true)
 
-	preset_name = str(data.get("name", path.get_file()))
+	preset_name = str(data.get("name", "Online board"))
+	return true
+
+
+static func is_valid_data(data: Dictionary) -> bool:
+	if not (data.get("board") is Array):
+		return false
+
+	var rows: Array = data["board"]
+
+	if rows.size() != MoveRule.SIZE:
+		return false
+
+	for row in rows:
+		if not (row is String) or row.length() != MoveRule.SIZE:
+			return false
+
+	for y in range(MoveRule.SIZE):
+		var row: String = rows[y]
+		for x in range(MoveRule.SIZE):
+			var ch := row.substr(x, 1)
+			var piece_type: String = LETTERS.get(ch.to_lower(), "")
+
+			if ch != "." and piece_type == "":
+				return false
+
 	return true

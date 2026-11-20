@@ -5,7 +5,7 @@ const SETUP_SCENE := "res://scenes/main/game_setup.tscn"
 const WHITE_PIECE_SCENE := "res://Scenes/Chess/classic_white_piece.tscn"
 const BLACK_PIECE_SCENE := "res://Scenes/Chess/classic_black_piece.tscn"
 const SETTINGS_SCENE = preload("res://Scenes/Main/settings.tscn")
-const DAILY_SEED_PATH := "user://daily_seed.json"
+const DAILY_SEED_PATH := "res://data/daily_seed.json"
 
 const COPIES_PER_PIECE := 3
 const COLUMNS := 9
